@@ -5,8 +5,8 @@
  */
 
 using System;
-using System.Linq;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 using Kopernicus;
 
@@ -33,10 +33,10 @@ namespace Kronometer
 
             if  // Make sure the customClock needs to be used, and all values are defined properly
             (
-                Double.PositiveInfinity > ClockFormatter.H.value &&
-                ClockFormatter.H.value > ClockFormatter.M.value &&
-                ClockFormatter.M.value > ClockFormatter.S.value &&
-                ClockFormatter.S.value > 0
+                Double.PositiveInfinity > loader.hour.value &&
+                loader.hour.value > loader.minute.value &&
+                loader.minute.value > loader.second.value &&
+                loader.second.value > 0
             )
             {
                 // Find the home planet
@@ -45,63 +45,79 @@ namespace Kronometer
                 // Get custom year and day duration
                 if (loader.useOrbitalParams)
                 {
-                    ClockFormatter.Y.value = homePlanet.orbitDriver.orbit.period;
-                    ClockFormatter.D.value = homePlanet.solarDayLength;
+                    loader.year.value = homePlanet.orbitDriver.orbit.period;
+                    loader.day.value = homePlanet.solarDayLength;
 
                     // If tidally locked set day = year
-                    if (ClockFormatter.Y.value == homePlanet.rotationPeriod)
-                        ClockFormatter.D.value = ClockFormatter.Y.value;
+                    if (loader.year.value == homePlanet.rotationPeriod)
+                        loader.day.value = loader.year.value;
                 }
 
                 // Convert negative numbers to positive
-                if (ClockFormatter.Y.value < 0)
-                    ClockFormatter.Y.value = -ClockFormatter.Y.value;
-                if (ClockFormatter.D.value < 0)
-                    ClockFormatter.D.value = -ClockFormatter.D.value;
+                if (loader.year.value < 0)
+                    loader.year.value = -loader.year.value;
+                if (loader.day.value < 0)
+                    loader.day.value = -loader.day.value;
 
                 // If weird numbers, abort
-                if (double.IsInfinity(ClockFormatter.D.value) || double.IsNaN(ClockFormatter.D.value) || double.IsInfinity(ClockFormatter.Y.value) || double.IsNaN(ClockFormatter.Y.value))
+                if (Double.IsInfinity(loader.day.value) || Double.IsNaN(loader.day.value) || Double.IsInfinity(loader.year.value) || Double.IsNaN(loader.year.value))
                 {
                     return;
                 }
 
                 // Replace the stock Formatter
-                KSPUtil.dateTimeFormatter = new ClockFormatter();
+                KSPUtil.dateTimeFormatter = new ClockFormatter(loader);
             }
         }
     }
 
     public class ClockFormatter : IDateTimeFormatter
     {
-        public static KSPUtil.DefaultDateTimeFormatter DTF = new KSPUtil.DefaultDateTimeFormatter();
+        /// <summary>
+        /// The object that contains the settings for the new clock
+        /// </summary>
+        protected ClockLoader loader { get; set; }
 
-        public static ClockFormatLoader S = new ClockFormatLoader("Second", "Seconds", "s", 1);
-        public static ClockFormatLoader M = new ClockFormatLoader("Minute", "Minutes", "m", 60);
-        public static ClockFormatLoader H = new ClockFormatLoader("Hour", "Hours", "h", 3600);
-        public static ClockFormatLoader D = new ClockFormatLoader("Day", "Days", "d", 3600 * (GameSettings.KERBIN_TIME ? 6 : 24));
-        public static ClockFormatLoader Y = new ClockFormatLoader("Year", "Years", "y", 3600 * (GameSettings.KERBIN_TIME ? 6 * 426 : 24 * 365));
-
-        public static int[] num = new int[6];
-
-        public string PrintTimeLong(double time)
+        /// <summary>
+        /// Create a new clock formatter
+        /// </summary>
+        public ClockFormatter(ClockLoader loader)
         {
-            string text = CheckNum(time);
+            this.loader = loader;
+        }
+
+        /// <summary>
+        /// Create a new clock formatter
+        /// </summary>
+        public ClockFormatter(ClockFormatter cloneFrom)
+        {
+            loader = cloneFrom.loader;
+        }
+
+        /// <summary>
+        /// Caches values from time calculations
+        /// </summary>
+        public Int32[] cache = new Int32[6];
+
+        public virtual String PrintTimeLong(Double time)
+        {
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
             GetTime(time);
             StringBuilder sb = StringBuilderCache.Acquire();
-            sb.Append(num[1]).Append(num[1] == 1 ? Y.singular : Y.plural).Append(", ");
-            sb.Append(num[5]).Append(num[5] == 1 ? D.singular : D.plural).Append(", ");
-            sb.Append(num[4]).Append(num[4] == 1 ? H.singular : H.plural).Append(", ");
-            sb.Append(num[3]).Append(num[3] == 1 ? M.singular : M.plural).Append(", ");
-            sb.Append(num[2]).Append(num[2] == 1 ? S.singular : S.plural);
+            sb.Append(cache[1]).Append(cache[1] == 1 ? loader.year.singular : loader.year.plural).Append(", ");
+            sb.Append(cache[5]).Append(cache[5] == 1 ? loader.day.singular : loader.day.plural).Append(", ");
+            sb.Append(cache[4]).Append(cache[4] == 1 ? loader.hour.singular : loader.hour.plural).Append(", ");
+            sb.Append(cache[3]).Append(cache[3] == 1 ? loader.minute.singular : loader.minute.plural).Append(", ");
+            sb.Append(cache[2]).Append(cache[2] == 1 ? loader.second.singular : loader.second.plural);
             return sb.ToStringAndRelease();
         }
 
-        public string PrintTimeStamp(double time, bool days = false, bool years = false)
+        public virtual String PrintTimeStamp(Double time, Boolean days = false, Boolean years = false)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
@@ -109,64 +125,64 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
             if (years)
-                stringBuilder.Append(Y.singular + " ").Append(num[1]).Append(", ");
+                stringBuilder.Append(loader.year.singular + " ").Append(cache[1]).Append(", ");
             if (days)
-                stringBuilder.Append("Day ").Append(num[5]).Append(" - ");
+                stringBuilder.Append("Day ").Append(cache[5]).Append(" - ");
 
-            stringBuilder.AppendFormat("{0:00}:{1:00}", num[4], num[3]);
+            stringBuilder.AppendFormat("{0:00}:{1:00}", cache[4], cache[3]);
 
-            if (num[1] < 10)
-                stringBuilder.AppendFormat(":{0:00}", num[2]);
+            if (cache[1] < 10)
+                stringBuilder.AppendFormat(":{0:00}", cache[2]);
 
             return stringBuilder.ToStringAndRelease();
         }
 
-        public string PrintTimeStampCompact(double time, bool days = false, bool years = false)
+        public virtual String PrintTimeStampCompact(Double time, Boolean days = false, Boolean years = false)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
             GetTime(time);
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             if (years)
-                stringBuilder.Append(num[1]).Append(Y.symbol + ", ");
+                stringBuilder.Append(cache[1]).Append(loader.year.symbol + ", ");
 
             if (days)
-                stringBuilder.Append(num[5]).Append(D.symbol + ", ");
+                stringBuilder.Append(cache[5]).Append(loader.day.symbol + ", ");
 
-            stringBuilder.AppendFormat("{0:00}:{1:00}", num[4], num[3]);
-            if (num[1] < 10)
-                stringBuilder.AppendFormat(":{0:00}", num[2]);
+            stringBuilder.AppendFormat("{0:00}:{1:00}", cache[4], cache[3]);
+            if (cache[1] < 10)
+                stringBuilder.AppendFormat(":{0:00}", cache[2]);
 
             return stringBuilder.ToStringAndRelease();
         }
 
-        public string PrintTime(double time, int valuesOfInterest, bool explicitPositive)
+        public virtual String PrintTime(Double time, Int32 valuesOfInterest, Boolean explicitPositive)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
-            bool flag = time < 0.0;
+            Boolean flag = time < 0.0;
             GetTime(time);
-            string[] array = { S.symbol, M.symbol, H.symbol, D.symbol, Y.symbol };
+            String[] symbols = { loader.second.symbol, loader.minute.symbol, loader.hour.symbol, loader.day.symbol, loader.year.symbol };
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             if (flag)
                 stringBuilder.Append("- ");
             else if (explicitPositive)
                 stringBuilder.Append("+ ");
 
-            int[] list = { num[2], num[3], num[4], num[5], num[1] };
-            int num0 = list.Length;
-            while (num0-- > 0)
+            Int32[] list = { cache[2], cache[3], cache[4], cache[5], cache[1] };
+            Int32 j = list.Length;
+            while (j-- > 0)
             {
-                if (list[num0] != 0)
+                if (list[j] != 0)
                 {
-                    for (int i = num0; i > Mathf.Max(num0 - valuesOfInterest, -1); i--)
+                    for (Int32 i = j; i > Mathf.Max(j - valuesOfInterest, -1); i--)
                     {
-                        stringBuilder.Append(Math.Abs(list[i])).Append(array[i]);
-                        if (i - 1 > Mathf.Max(num0 - valuesOfInterest, -1))
+                        stringBuilder.Append(Math.Abs(list[i])).Append(symbols[i]);
+                        if (i - 1 > Mathf.Max(j - valuesOfInterest, -1))
                             stringBuilder.Append(", ");
                     }
                     break;
@@ -175,29 +191,29 @@ namespace Kronometer
             return stringBuilder.ToStringAndRelease();
         }
 
-        public string PrintTimeCompact(double time, bool explicitPositive)
+        public virtual String PrintTimeCompact(Double time, Boolean explicitPositive)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
-
-            bool flag = time < 0.0;
+            
             GetTime(time);
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
-            if (flag)
+            if (time < 0.0)
                 stringBuilder.Append("T- ");
             else if (explicitPositive)
                 stringBuilder.Append("T+ ");
 
-            if (num[5] > 0)
-                stringBuilder.Append(Math.Abs(num[5])).Append(":");
+            if (cache[5] > 0)
+                stringBuilder.Append(Math.Abs(cache[5])).Append(":");
 
-            stringBuilder.AppendFormat("{0:00}:{1:00}:{2:00}", num[4], num[3], num[2]);
+            stringBuilder.AppendFormat("{0:00}:{1:00}:{2:00}", cache[4], cache[3], cache[2]);
             return stringBuilder.ToStringAndRelease();
         }
-        public string PrintDateDelta(double time, bool includeTime, bool includeSeconds, bool useAbs)
+
+        public virtual String PrintDateDelta(Double time, Boolean includeTime, Boolean includeSeconds, Boolean useAbs)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
@@ -207,74 +223,74 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             GetTime(time);
 
-            if (num[1] > 1)
-                stringBuilder.Append(num[1]).Append(" " + Y.plural);
-            else if (num[1] == 1)
-                stringBuilder.Append(num[1]).Append(" " + Y.singular);
+            if (cache[1] > 1)
+                stringBuilder.Append(cache[1]).Append(" " + loader.year.plural);
+            else if (cache[1] == 1)
+                stringBuilder.Append(cache[1]).Append(" " + loader.year.singular);
 
-            if (num[5] > 1)
+            if (cache[5] > 1)
             {
                 if (stringBuilder.Length != 0)
                     stringBuilder.Append(", ");
-                stringBuilder.Append(num[5]).Append(" " + D.plural);
+                stringBuilder.Append(cache[5]).Append(" " + loader.day.plural);
             }
-            else if (num[5] == 1)
+            else if (cache[5] == 1)
             {
                 if (stringBuilder.Length != 0)
                     stringBuilder.Append(", ");
-                stringBuilder.Append(num[5]).Append(" " + D.singular);
+                stringBuilder.Append(cache[5]).Append(" " + loader.day.singular);
             }
             if (includeTime)
             {
-                if (num[4] > 1)
+                if (cache[4] > 1)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[4]).Append(" " + H.plural);
+                    stringBuilder.Append(cache[4]).Append(" " + loader.hour.plural);
                 }
-                else if (num[4] == 1)
+                else if (cache[4] == 1)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[4]).Append(" " + H.singular);
+                    stringBuilder.Append(cache[4]).Append(" " + loader.hour.singular);
                 }
-                if (num[3] > 1)
+                if (cache[3] > 1)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[3]).Append(" " + M.plural);
+                    stringBuilder.Append(cache[3]).Append(" " + loader.minute.plural);
                 }
-                else if (num[3] == 1)
+                else if (cache[3] == 1)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[3]).Append(" " + M.singular);
+                    stringBuilder.Append(cache[3]).Append(" " + loader.minute.singular);
                 }
                 if (includeSeconds)
                 {
-                    if (num[2] > 1)
+                    if (cache[2] > 1)
                     {
                         if (stringBuilder.Length != 0)
                             stringBuilder.Append(", ");
-                        stringBuilder.Append(num[2]).Append(" " + S.plural);
+                        stringBuilder.Append(cache[2]).Append(" " + loader.second.plural);
                     }
-                    else if (num[2] == 1)
+                    else if (cache[2] == 1)
                     {
                         if (stringBuilder.Length != 0)
                             stringBuilder.Append(", ");
-                        stringBuilder.Append(num[2]).Append(" " + S.singular);
+                        stringBuilder.Append(cache[2]).Append(" " + loader.second.singular);
                     }
                 }
             }
             if (stringBuilder.Length == 0)
-                stringBuilder.Append((!includeTime) ? "0 " + D.plural : ((!includeSeconds) ? "0 " + M.plural : "0 " + S.plural));
+                stringBuilder.Append((!includeTime) ? "0 " + loader.day.plural : ((!includeSeconds) ? "0 " + loader.minute.plural : "0 " + loader.second.plural));
 
             return stringBuilder.ToStringAndRelease();
         }
 
-        public string PrintDateDeltaCompact(double time, bool includeTime, bool includeSeconds, bool useAbs)
+        public virtual String PrintDateDeltaCompact(Double time, Boolean includeTime, Boolean includeSeconds, Boolean useAbs)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
@@ -283,44 +299,44 @@ namespace Kronometer
 
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             GetTime(time);
-            if (num[1] > 0)
-                stringBuilder.Append(num[1]).Append(Y.symbol);
+            if (cache[1] > 0)
+                stringBuilder.Append(cache[1]).Append(loader.year.symbol);
 
-            if (num[5] > 0)
+            if (cache[5] > 0)
             {
                 if (stringBuilder.Length != 0)
                     stringBuilder.Append(", ");
-                stringBuilder.Append(num[5]).Append(D.symbol);
+                stringBuilder.Append(cache[5]).Append(loader.day.symbol);
             }
             if (includeTime)
             {
-                if (num[4] > 0)
+                if (cache[4] > 0)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[4]).Append(H.symbol);
+                    stringBuilder.Append(cache[4]).Append(loader.hour.symbol);
                 }
-                if (num[3] > 0)
+                if (cache[3] > 0)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[3]).Append(M.symbol);
+                    stringBuilder.Append(cache[3]).Append(loader.minute.symbol);
                 }
-                if (includeSeconds && num[2] > 0)
+                if (includeSeconds && cache[2] > 0)
                 {
                     if (stringBuilder.Length != 0)
                         stringBuilder.Append(", ");
-                    stringBuilder.Append(num[2]).Append(S.symbol);
+                    stringBuilder.Append(cache[2]).Append(loader.second.symbol);
                 }
             }
             if (stringBuilder.Length == 0)
-                stringBuilder.Append((!includeTime) ? "0" + D.symbol : ((!includeSeconds) ? "0" + M.symbol : "0" + S.symbol));
+                stringBuilder.Append((!includeTime) ? "0" + loader.day.symbol : ((!includeSeconds) ? "0" + loader.minute.symbol : "0" + loader.second.symbol));
             return stringBuilder.ToStringAndRelease();
         }
 
-        public string PrintDate(double time, bool includeTime, bool includeSeconds = false)
+        public virtual String PrintDate(Double time, Boolean includeTime, Boolean includeSeconds = false)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
 
             if (text != null)
                 return text;
@@ -329,58 +345,58 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             GetDate(time);
 
-            stringBuilder.Append(Y.singular + " ").Append(num[1] + 1).Append(", " + D.singular + " ").Append(num[5] + 1);
+            stringBuilder.Append(loader.year.singular + " ").Append(cache[1] + 1).Append(", " + loader.day.singular + " ").Append(cache[5] + 1);
             if (includeTime)
-                stringBuilder.Append(" - ").Append(num[4]).Append(H.symbol + ", ").Append(num[3]).Append(M.symbol);
+                stringBuilder.Append(" - ").Append(cache[4]).Append(loader.hour.symbol + ", ").Append(cache[3]).Append(loader.minute.symbol);
             if (includeSeconds)
-                stringBuilder.Append(", ").Append(num[2]).Append(S.symbol);
+                stringBuilder.Append(", ").Append(cache[2]).Append(loader.second.symbol);
             return stringBuilder.ToStringAndRelease();
         }
-        public string PrintDateNew(double time, bool includeTime)
+        public String PrintDateNew(Double time, Boolean includeTime)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             GetDate(time);
-            stringBuilder.Append(Y.singular + " ").Append(num[1] + 1).Append(", " + D.singular + " ").Append(num[5] + 1);
+            stringBuilder.Append(loader.year.singular + " ").Append(cache[1] + 1).Append(", " + loader.day.singular + " ").Append(cache[5] + 1);
             if (includeTime)
-                stringBuilder.AppendFormat(" - {0:D2}:{1:D2}:{2:D2}", num[4], num[3], num[2]);
+                stringBuilder.AppendFormat(" - {0:D2}:{1:D2}:{2:D2}", cache[4], cache[3], cache[2]);
             return stringBuilder.ToStringAndRelease();
         }
 
-        public string PrintDateCompact(double time, bool includeTime, bool includeSeconds = false)
+        public virtual String PrintDateCompact(Double time, Boolean includeTime, Boolean includeSeconds = false)
         {
-            string text = CheckNum(time);
+            String text = CheckNum(time);
             if (text != null)
                 return text;
 
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
             GetDate(time);
-            stringBuilder.AppendFormat(Y.symbol + "{0}, " + D.symbol + "{1:00}", num[1] + 1, num[5] + 1);
+            stringBuilder.AppendFormat(loader.year.symbol + "{0}, " + loader.day.symbol + "{1:00}", cache[1] + 1, cache[5] + 1);
             if (includeTime)
-                stringBuilder.AppendFormat(", {0}:{1:00}", num[4], num[3]);
+                stringBuilder.AppendFormat(", {0}:{1:00}", cache[4], cache[3]);
             if (includeSeconds)
-                stringBuilder.AppendFormat(":{0:00}", num[2]);
+                stringBuilder.AppendFormat(":{0:00}", cache[2]);
             return stringBuilder.ToStringAndRelease();
         }
 
-        private static string CheckNum(double time)
+        private static String CheckNum(Double time)
         {
-            if (double.IsNaN(time))
+            if (Double.IsNaN(time))
                 return "NaN";
 
-            if (double.IsPositiveInfinity(time))
+            if (Double.IsPositiveInfinity(time))
                 return "+Inf";
 
-            if (double.IsNegativeInfinity(time))
+            if (Double.IsNegativeInfinity(time))
                 return "-Inf";
 
             return null;
         }
 
-        public void GetDate(double time)
+        public virtual void GetDate(Double time)
         {
             // This will work also when a year cannot be divided in days without a remainder
             // If the year ends halfway through a day, the clock will go:
@@ -389,73 +405,88 @@ namespace Kronometer
             // This way the time shown by the clock will always be consistent with the position of the sun in the sky
 
             // Current Year
-            int num1 = (int)(time / Y.value);
-            // Current Day
-            int num5 = (int) ((time / D.value) - Math.Round(num1 * Y.value / D.value, 0, MidpointRounding.AwayFromZero));
-            // Time left to count
-            double num0 = time % D.value;
-            // Number of hours in this day
-            int num4 = (int)(num0 / H.value);
-            // Time left to count
-            num0 = num0 - num4 * H.value;
-            // Number of minutes in this hour
-            int num3 = (int)(num0 / M.value);
-            // Time left to count
-            num0 = num0 - num3 * M.value;
-            // Number of seconds in this minute
-            int num2 = (int)(num0 / S.value);
+            Int32 year = (Int32)(time / loader.year.value);
 
-            num = new int[] { 0, num1, num2, num3, num4, num5 };
+            // Current Day
+            Int32 day = (Int32)((time / loader.day.value) - Math.Round(year * loader.year.value / loader.day.value, 0, MidpointRounding.AwayFromZero));
+
+            // Time left to count
+            Double left = time % loader.day.value;
+
+            // Number of hours in this day
+            Int32 hours = (Int32)(left / loader.hour.value);
+
+            // Time left to count
+            left = left - hours * loader.hour.value;
+
+            // Number of minutes in this hour
+            Int32 minutes = (Int32)(left / loader.minute.value);
+
+            // Time left to count
+            left = left - minutes * loader.minute.value;
+
+            // Number of seconds in this minute
+            Int32 seconds = (Int32)(left / loader.second.value);
+
+            cache = new [] { 0, year, seconds, minutes, num4, day };
         }
 
-        public void GetTime(double time)
+        public virtual void GetTime(Double time)
         {
             // This will count the number of Years, Days, Hours, Minutes and Seconds
             // If a Year lasts 10.5 days, and time = 14 days, the result will be: 
-            // 1 Year, 3 days, and whatever hours-minutes-seconds fit in 0.5 days.
+            // 1 Year, 3 days, and whatever hours-minutes-seconds fit in 0.5 dayloader.second.
             // ( 10.5 + 3 + 0.5 = 14 )
 
             // Number of years
-            int num1 = (int)(time / Y.value);
+            Int32 years = (Int32)(time / loader.year.value);
+
             // Time left to count
-            double num0 = time - num1 * Y.value;
+            Double left = time - years * loader.year.value;
+
             // Number of days
-            int num5 = (int)(num0 / D.value);
+            Int32 days = (Int32)(left / loader.day.value);
+
             // Time left to count
-            num0 = num0 - num5 * D.value;
+            left = left - days * loader.day.value;
+
             // Number of hours
-            int num4 = (int)(num0 / H.value);
+            Int32 hours = (Int32)(left / loader.hour.value);
+
             // Time left to count
-            num0 = num0 - num4 * H.value;
+            left = left - hours * loader.hour.value;
+
             // Number of minutes
-            int num3 = (int)(num0 / M.value);
+            Int32 minutes = (Int32)(left / loader.minute.value);
+
             // Time left to count
-            num0 = num0 - num3 * M.value;
+            left = left - minutes * loader.minute.value;
+
             // Number of seconds
-            int num2 = (int)(num0 / S.value);
+            Int32 seconds = (Int32)(left / loader.second.value);
 
-            num = new[] { 0, num1, num2, num3, num4, num5 };
+            cache = new[] { 0, years, seconds, minutes, hours, days };
         }
 
-        public int Second
+        public virtual Int32 Second
         {
-            get { return (int)S.value; }
+            get { return (Int32)loader.second.value; }
         }
-        public int Minute
+        public virtual Int32 Minute
         {
-            get { return (int)M.value; }
+            get { return (Int32)loader.minute.value; }
         }
-        public int Hour
+        public virtual Int32 Hour
         {
-            get { return (int)H.value; }
+            get { return (Int32)loader.hour.value; }
         }
-        public int Day
+        public virtual Int32 Day
         {
-            get { return (int)D.value; }
+            get { return (Int32)loader.day.value; }
         }
-        public int Year
+        public virtual Int32 Year
         {
-            get { return (int)Y.value; }
+            get { return (Int32)loader.year.value; }
         }
     }
 }
