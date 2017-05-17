@@ -40,7 +40,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClockLoader.cs" />
+    <Compile Include="KronometerLoader.cs" />
     <Compile Include="Kronometer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
