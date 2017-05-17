@@ -704,6 +704,7 @@ namespace Kronometer
             .Replace(">", "}")
             .Replace("{{", "<")
             .Replace("}}", ">")
+            .Replace("{ ", " ")
 
             // Fix Years
             .Replace("{Y}", "{0}")
