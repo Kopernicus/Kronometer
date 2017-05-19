@@ -4,115 +4,79 @@
  * Licensed under the Terms of the MIT License
  */
 
+using System;
 using System.Collections.Generic;
 using Kopernicus;
 
 namespace Kronometer
 {
-    // VARIOUS LOADERS FOR KRONOMETER SETTINGS
+    /// <summary>
+    /// Loads the settings that control Kronometer
+    /// </summary>
     [RequireConfigType(ConfigType.Node)]
-    public class SettingsLoader : IParserEventSubscriber
+    public class SettingsLoader
     {
-        // Load General Settings
+        // Whether to calculate the length of a day based on the orbital parameters of the home body
         [ParserTarget("useHomeDay")]
-        public NumericParser<bool> useHomeDay
-        {
-            set
-            {
-                if (value.value)
-                    Kronometer.useHomeDay = value.value;
-            }
-        }
+        public NumericParser<bool> useHomeDay { get; set; }
 
+        // Calculates the length of a year based on the orbit of the home body
         [ParserTarget("useHomeYear")]
-        public NumericParser<bool> useHomeYear
-        {
-            set
-            {
-                if (value.value)
-                    Kronometer.useHomeYear = value.value;
-            }
-        }
+        public NumericParser<bool> useHomeYear { get; set; }
 
+        // Automatically adds leap years if the day length and year length dont fit
         [ParserTarget("useLeapYears")]
-        public NumericParser<bool> useLeapYears
-        {
-            set
-            {
-                if (value.value)
-                    Kronometer.useLeapYears = value.value;
-            }
-        }
-
-
+        public NumericParser<bool> useLeapYears { get; set; }
 
         // Load Custom Time
         [ParserTarget("CustomTime", allowMerge = true, optional = true)]
         public ClockLoader Clock = new ClockLoader();
 
-
-
         // Load Custom Months
         [ParserTargetCollection("Months", allowMerge = true)]
-        public List<Month> calendar
-        {
-            set { ClockFormatter.calendar = new List<Month>(value); }
-        }
-        
+        public List<Month> calendar = new List<Month>();
+
         // This defines after how many months the number displayed will reset back to 1
         // This needs to load after the list of months
+        public Int32 resetMonthNum { get; set; }
+
         [ParserTarget("resetMonthNumAfterMonths")]
-        public NumericParser<int> resetMonthNum
+        private NumericParser<int> resetMonthNumLoader
         {
             set
             {
-                if (value.value > 0)
-                    Kronometer.resetMonthNum = value.value;
-                else if (ClockFormatter.calendar.Count > 0)
-                    Kronometer.resetMonthNum = ClockFormatter.calendar.Count;
+                if (value > 0)
+                    resetMonthNum = value;
+                else if (calendar.Count > 0)
+                    resetMonthNum = calendar.Count;
                 else
-                    Kronometer.resetMonthNum = 1;
+                    resetMonthNum = 1;
+            }
+        }
+
+        // This defines after how many years the actual months will reset back to the first month
+        public Int32 resetMonths { get; set; }
+
+        [ParserTarget("resetMonthsAfterYears")]
+        private NumericParser<int> resetMonthsLoader
+        {
+            set
+            {
+                if (value > 0)
+                    resetMonths = value;
             }
         }
         
-        // This defines after how many years the actual months will reset back to the first month
-        [ParserTarget("resetMonthsAfterYears")]
-        public NumericParser<int> resetMonths
-        {
-            set
-            {
-                if (value.value > 0)
-                    Kronometer.resetMonths = value.value;
-            }
-        }
-
-
-
         // Load Custom Display
         [ParserTarget("DisplayDate", allowMerge = true, optional = true)]
         public CustomDisplay Display = new CustomDisplay();
-
-
-
-        void IParserEventSubscriber.Apply(ConfigNode node)
-        {
-            // Turn On The Kronometer
-            Kronometer.useCustomClock = true;
-        }
-
-        void IParserEventSubscriber.PostApply(ConfigNode node)
-        {
-        }
-
-        public SettingsLoader()
-        {
-        }
     }
 
-
-    // Loader for time units names, symbols, and durations
+    /// <summary>
+    /// Loader for time units names, symbols, and durations
+    /// </summary>
     [RequireConfigType(ConfigType.Node)]
-    public class ClockLoader : IParserEventSubscriber
+    public class ClockLoader
     {
         [ParserTarget("Second", allowMerge = true)]
         public TimeUnits second = new TimeUnits("Second", "Seconds", "s", 1);
@@ -128,32 +92,13 @@ namespace Kronometer
 
         [ParserTarget("Year", allowMerge = true)]
         public TimeUnits year = new TimeUnits("Year", "Years", "y", 3600 * (GameSettings.KERBIN_TIME ? 6 * 426 : 24 * 365));
-
-
-
-        void IParserEventSubscriber.Apply(ConfigNode node)
-        {
-        }
-
-        void IParserEventSubscriber.PostApply(ConfigNode node)
-        {
-            // Send time units definitions to the ClockFormatter
-            ClockFormatter.S = second;
-            ClockFormatter.M = minute;
-            ClockFormatter.H = hour;
-            ClockFormatter.D = day;
-            ClockFormatter.Y = year;
-        }
-
-        public ClockLoader()
-        {
-        }
     }
 
-
-    // Class to handle time units easily
+    /// <summary>
+    /// Class to handle time units easily
+    /// </summary>
     [RequireConfigType(ConfigType.Node)]
-    public class TimeUnits : IParserEventSubscriber
+    public class TimeUnits
     {
         [ParserTarget("singular")]
         public string singular;
@@ -167,16 +112,6 @@ namespace Kronometer
         [ParserTarget("value")]
         public NumericParser<double> value;
 
-
-
-        void IParserEventSubscriber.Apply(ConfigNode node)
-        {
-        }
-
-        void IParserEventSubscriber.PostApply(ConfigNode node)
-        {
-        }
-
         public TimeUnits(string singular, string plural, string symbol, double value)
         {
             this.singular = singular;
@@ -184,16 +119,13 @@ namespace Kronometer
             this.symbol = symbol;
             this.value = value;
         }
-
-        public TimeUnits()
-        {
-        }
     }
 
-
-    // Loader for custom dates
+    /// <summary>
+    /// Loader for custom dates
+    /// </summary>
     [RequireConfigType(ConfigType.Node)]
-    public class CustomDisplay : IParserEventSubscriber
+    public class CustomDisplay
     {
         [ParserTarget("PrintDate", allowMerge = true)]
         public DisplayLoader CustomPrintDate = new DisplayLoader(1, 1, "<Y1> <Y>, <D1> <D>", " - <H><H0><M><M0>", ", <S><S0>");
@@ -203,29 +135,14 @@ namespace Kronometer
 
         [ParserTarget("PrintDateCompact", allowMerge = true)]
         public DisplayLoader CustomPrintDateCompact = new DisplayLoader(1, 1, "<Y0><Y>, <D0><D:00>", ", <H>:<M:00>", ":<S:00>");
-
-
-
-        void IParserEventSubscriber.Apply(ConfigNode node)
-        {
-        }
-
-        void IParserEventSubscriber.PostApply(ConfigNode node)
-        {
-            ClockFormatter.CustomPrintDate = CustomPrintDate;
-            ClockFormatter.CustomPrintDateNew = CustomPrintDateNew;
-            ClockFormatter.CustomPrintDateCompact = CustomPrintDateCompact;
-        }
-
-        public CustomDisplay()
-        {
-        }
     }
 
 
-    // Loader for custom date display formats
+    /// <summary>
+    /// Loader for custom date display formats
+    /// </summary>
     [RequireConfigType(ConfigType.Node)]
-    public class DisplayLoader : IParserEventSubscriber
+    public class DisplayLoader
     {
         [ParserTarget("offsetYear")]
         public NumericParser<int> offsetYear;
@@ -242,20 +159,6 @@ namespace Kronometer
         [ParserTarget("displaySeconds")]
         public string displaySeconds;
 
-
-
-        void IParserEventSubscriber.Apply(ConfigNode node)
-        {
-        }
-
-        void IParserEventSubscriber.PostApply(ConfigNode node)
-        {
-        }
-
-        public DisplayLoader()
-        {
-        }
-
         public DisplayLoader(int offsetYear, int offsetDay, string displayDate, string displayTime, string displaySeconds)
         {
             this.offsetYear = offsetYear;
@@ -267,9 +170,11 @@ namespace Kronometer
     }
 
 
-    // Small class to handle months
+    /// <summary>
+    ///  Small class to handle months
+    /// </summary>
     [RequireConfigType(ConfigType.Node)]
-    public class Month : IParserEventSubscriber
+    public class Month
     {
         [ParserTarget("name")]
         public string name = "";
@@ -280,27 +185,11 @@ namespace Kronometer
         [ParserTarget("days")]
         public NumericParser<int> days = 0;
 
-
-        // Get the number of this month
-        public int number
+        public Int32 Number(List<Month> calendar, Int32 resetMonthNum)
         {
-            get
-            {
-                if (ClockFormatter.calendar.Contains(this))
-                    return (ClockFormatter.calendar.IndexOf(this) % Kronometer.resetMonthNum) + 1;
-                else
-                    return 0;
-            }
-        }
-
-
-
-        void IParserEventSubscriber.Apply(ConfigNode node)
-        {
-        }
-
-        void IParserEventSubscriber.PostApply(ConfigNode node)
-        {
+            if (calendar.Contains(this))
+                return (calendar.IndexOf(this) % resetMonthNum) + 1;
+            return 0;
         }
 
         public Month(string name, string symbol, int days)
@@ -308,10 +197,6 @@ namespace Kronometer
             this.name = name;
             this.symbol = symbol;
             this.days = days;
-        }
-
-        public Month()
-        {
         }
     }
 }
