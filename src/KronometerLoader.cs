@@ -128,13 +128,13 @@ namespace Kronometer
     public class CustomDisplay
     {
         [ParserTarget("PrintDate", allowMerge = true)]
-        public DisplayLoader CustomPrintDate = new DisplayLoader(1, 1, "<Y1> <Y>, <D1> <D>", " - <H><H0><M><M0>", ", <S><S0>");
+        public DisplayLoader CustomPrintDate = new DisplayLoader(0, 1, 1, "<Y1> <Y>, <D1> <D>", " - <H><H0><M><M0>", ", <S><S0>");
 
         [ParserTarget("PrintDateNew", allowMerge = true)]
-        public DisplayLoader CustomPrintDateNew = new DisplayLoader(1, 1, "<Y1> <Y>, <D1> <D>", " - <H:D2>:<M:D2>:<S:D2>", "");
+        public DisplayLoader CustomPrintDateNew = new DisplayLoader(0, 1, 1, "<Y1> <Y>, <D1> <D>", " - <H:D2>:<M:D2>:<S:D2>", "");
 
         [ParserTarget("PrintDateCompact", allowMerge = true)]
-        public DisplayLoader CustomPrintDateCompact = new DisplayLoader(1, 1, "<Y0><Y>, <D0><D:00>", ", <H>:<M:00>", ":<S:00>");
+        public DisplayLoader CustomPrintDateCompact = new DisplayLoader(0, 1, 1, "<Y0><Y>, <D0><D:00>", ", <H>:<M:00>", ":<S:00>");
     }
 
 
