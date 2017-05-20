@@ -758,14 +758,14 @@ namespace Kronometer
         /// <summary>
         /// From an integer input, outputs the correct ordinal suffix
         /// RULES:
-        /// All numbers ending in '1' except '11' get 'st'
-        /// All numbers ending in '2' except '12' get 'nd'
-        /// All numbers ending in '3' except '13' get 'rd'
+        /// All numbers ending in '1' (except those ending in '11') get 'st'
+        /// All numbers ending in '2' (except those ending in '12') get 'nd'
+        /// All numbers ending in '3' (except those ending in '13') get 'rd'
         /// All remaining numbers get 'th'
         /// </summary>
         public virtual string GetOrdinal(int number)
         {
-            string s = number.ToString();
+            string s = (number % 100).ToString();
             if (s.Length == 1 || (s.Length > 1 && s[s.Length - 2] != '1'))
             {
                 if (s[s.Length - 1] == '1')
