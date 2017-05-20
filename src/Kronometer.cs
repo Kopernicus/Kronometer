@@ -546,6 +546,9 @@ namespace Kronometer
             // The StringBuilder we will use to assemble the date
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
+            // Offset time
+            time += loader.Display.CustomPrintDateNew.offsetTime;
+
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
 
@@ -584,6 +587,9 @@ namespace Kronometer
             // The StringBuilder we will use to assemble the date
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
+            // Offset time
+            time += loader.Display.CustomPrintDateNew.offsetTime;
+
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
 
@@ -617,6 +623,9 @@ namespace Kronometer
 
             // The StringBuilder we will use to assemble the date
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
+
+            // Offset time
+            time += loader.Display.CustomPrintDateNew.offsetTime;
 
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
