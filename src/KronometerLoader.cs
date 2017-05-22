@@ -196,6 +196,13 @@ namespace Kronometer
             return 0;
         }
 
+        public Month()
+        {
+            name = "";
+            symbol = "";
+            days = 0;
+        }
+
         public Month(string name, string symbol, int days)
         {
             this.name = name;
