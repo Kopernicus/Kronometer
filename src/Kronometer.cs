@@ -387,7 +387,7 @@ namespace Kronometer
             int year = (int)(time / loader.Clock.year.value);
 
             // Current Day
-            int day = (int)((time / loader.Clock.day.value) - Math.Round(year * loader.Clock.year.value / loader.Clock.day.value, 0, MidpointRounding.AwayFromZero));
+            int day = (int)(time / loader.Clock.day.value) - Math.Round(year * loader.Clock.year.value / loader.Clock.day.value, 0, MidpointRounding.AwayFromZero);
 
             // Time left to count
             double left = time % loader.Clock.day.value;
