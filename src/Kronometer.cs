@@ -21,7 +21,7 @@ namespace Kronometer
         /// Name of the config node group which manages Kronometer
         /// </summary>
         public const string rootNodeName = "Kronometer";
-        
+
         void Start()
         {
             // Get the configNode
@@ -29,7 +29,7 @@ namespace Kronometer
 
             // Parse the config node
             SettingsLoader loader = Parser.CreateObjectFromConfigNode<SettingsLoader>(kronometer);
-            
+
             if  // Make sure we need the clock and all values are defined properly
             (
                 double.PositiveInfinity > loader.Clock.hour.value &&
@@ -83,7 +83,7 @@ namespace Kronometer
             this.loader = loader;
             FormatFixer();
         }
-        
+
         /// <summary>
         /// Create a new clock formatter
         /// </summary>
@@ -372,7 +372,7 @@ namespace Kronometer
                 stringBuilder.Append((!includeTime) ? "0" + loader.Clock.day.symbol : ((!includeSeconds) ? "0" + loader.Clock.minute.symbol : "0" + loader.Clock.second.symbol));
             return stringBuilder.ToStringAndRelease();
         }
-        
+
         /// <summary>
         /// Calculates the current date
         /// This will work also when a year cannot be divided in days without a remainder
@@ -384,13 +384,19 @@ namespace Kronometer
         public virtual Date GetDate(double time)
         {
             // Current Year
-            int year = (int)(time / loader.Clock.year.value);
+            int year = (int)Math.Floor(time / loader.Clock.year.value);
 
-            // Current Day
-            int day = (int)(time / loader.Clock.day.value) - Math.Round(year * loader.Clock.year.value / loader.Clock.day.value, 0, MidpointRounding.AwayFromZero);
+            // Time passed this year
+            double timeThisYear = time - loader.Clock.year.value * year;
+
+            // Time carried over from last year
+            double CarryOver = CarryOver = loader.Clock.day.value - Math.Abs((loader.Clock.year.value % loader.Clock.day.value) * year);
+
+            // Current Day of the year
+            int day = (int)Math.Floor((timeThisYear - CarryOver) / loader.Clock.day.value.value);
 
             // Time left to count
-            double left = time % loader.Clock.day.value;
+            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -452,10 +458,10 @@ namespace Kronometer
             double timeLeftThisYear = time - timeFromPreviousYears;
 
             // Current Day of the Year (calculated as if there were no leap years)
-            int day = Math.Floor(timeLeftThisYear / loader.Clock.day.value);
+            int day = (int)Math.Floor(timeLeftThisYear / loader.Clock.day.value);
 
             // Remove the days lost to leap years
-            day -= Math.Floor(chanceOfLeapDay * year);
+            day -= (int)Math.Floor(chanceOfLeapDay * year);
 
             // If days go negative, borrow days from the previous year
             while (day < 0)
@@ -653,7 +659,7 @@ namespace Kronometer
 
             return stringBuilder.ToStringAndRelease();
         }
-        
+
         /// <summary>
         /// Call FormatFixer on all 'DisplayLoader's 
         /// </summary>
