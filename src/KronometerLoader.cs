@@ -66,7 +66,7 @@ namespace Kronometer
                     resetMonths = value;
             }
         }
-        
+
         // Load Custom Display
         [ParserTarget("DisplayDate", allowMerge = true, optional = true)]
         public CustomDisplay Display = new CustomDisplay();
