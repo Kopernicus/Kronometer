@@ -448,26 +448,26 @@ namespace Kronometer
             int year = (int)(time / shortYear);
 
             // Time left this year (calculated as if there were no leap years)
-            double timeFromPreviousYears = year * daysInOneShortYear * loader.Clock.day.value;
+            double timeFromPreviousYears = year * shortYear;
             double timeLeftThisYear = time - timeFromPreviousYears;
 
             // Current Day of the Year (calculated as if there were no leap years)
-            int day = (int)(timeLeftThisYear / loader.Clock.day.value);
+            int day = Math.Floor(timeLeftThisYear / loader.Clock.day.value);
 
             // Remove the days lost to leap years
-            day -= (int)(chanceOfLeapDay * year);
+            day -= Math.Floor(chanceOfLeapDay * year);
 
             // If days go negative, borrow days from the previous year
             while (day < 0)
             {
                 year--;
-                day += (int)(loader.Clock.year.value / loader.Clock.day.value) + 1;
+                day += daysInOneShortYear + 1;
             }
 
             // Now 'day' and 'year' correctly account for leap years
 
             // Time left to count
-            double left = time % loader.Clock.day.value;
+            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
