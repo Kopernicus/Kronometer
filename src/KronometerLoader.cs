@@ -18,15 +18,15 @@ namespace Kronometer
     {
         // Whether to calculate the length of a day based on the orbital parameters of the home body
         [ParserTarget("useHomeDay")]
-        public NumericParser<bool> useHomeDay { get; set; }
+        public NumericParser<bool> useHomeDay = new NumericParser<bool>(false);
 
         // Calculates the length of a year based on the orbit of the home body
         [ParserTarget("useHomeYear")]
-        public NumericParser<bool> useHomeYear { get; set; }
+        public NumericParser<bool> useHomeYear = new NumericParser<bool>(false);
 
         // Automatically adds leap years if the day length and year length dont fit
         [ParserTarget("useLeapYears")]
-        public NumericParser<bool> useLeapYears { get; set; }
+        public NumericParser<bool> useLeapYears = new NumericParser<bool>(false);
 
         // Load Custom Time
         [ParserTarget("CustomTime", allowMerge = true, optional = true)]
