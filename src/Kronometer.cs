@@ -553,7 +553,7 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
             // Offset time
-            time += loader.Display.CustomPrintDateNew.offsetTime;
+            time += loader.Display.CustomPrintDate.offsetTime;
 
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
@@ -631,7 +631,7 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
             // Offset time
-            time += loader.Display.CustomPrintDateNew.offsetTime;
+            time += loader.Display.CustomPrintDateCompact.offsetTime;
 
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
