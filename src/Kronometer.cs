@@ -577,7 +577,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month.Number(loader.calendar, loader.resetMonthNum), date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -614,7 +614,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month.Number(loader.calendar, loader.resetMonthNum), date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -655,7 +655,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month.Number(loader.calendar, loader.resetMonthNum), date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -763,8 +763,8 @@ namespace Kronometer
             .Replace("{S2}", date.seconds == 1 ? loader.Clock.second.singular : loader.Clock.second.plural)
 
             // Fix Months
-            .Replace("{Mo0}", date.month != null ? date.month.symbol : "{Mo0}")
-            .Replace("{Mo1}", date.month != null ? date.month.name : "{Mo0}")
+            .Replace("{Mo0}", date.month != null ? date.month.symbol : "NaM")
+            .Replace("{Mo1}", date.month != null ? date.month.name : "NaM")
 
             // Fix Days
             .Replace("{Dth}", GetOrdinal(date.day));
