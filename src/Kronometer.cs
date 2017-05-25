@@ -763,8 +763,8 @@ namespace Kronometer
             .Replace("{S2}", date.seconds == 1 ? loader.Clock.second.singular : loader.Clock.second.plural)
 
             // Fix Months
-            .Replace("{Mo0}", date.month.symbol)
-            .Replace("{Mo1}", date.month.name)
+            .Replace("{Mo0}", date.month != null ? date.month.symbol : "{Mo0}")
+            .Replace("{Mo1}", date.month != null ? date.month.name : "{Mo0}")
 
             // Fix Days
             .Replace("{Dth}", GetOrdinal(date.day));
