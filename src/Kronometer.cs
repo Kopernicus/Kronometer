@@ -502,13 +502,13 @@ namespace Kronometer
                 // Note: months reset every N years (Kronometer.resetMonths)
 
                 // Total days passed untill now
-                int daysPassedTOT = (int)(time / loader.Clock.day.value);
+                int daysPassedTOT = (int)Math.Floor(time / loader.Clock.day.value);
 
                 // Days between month resets = normal days between month resets + leap days between month resets
                 int daysBetweenResets = (daysInOneShortYear * loader.resetMonths) + (int)(chanceOfLeapDay * loader.resetMonths);
 
                 // Days passed since last month reset
-                int daysFromReset = daysPassedTOT % daysBetweenResets;
+                int daysFromReset = (daysPassedTOT % daysBetweenResets + daysBetweenResets) % daysBetweenResets;
 
 
 
