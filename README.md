@@ -136,16 +136,38 @@ The Kronometer root node contains five general settings and three nodes for more
    [*PrintDateCompact*](https://kerbalspaceprogram.com/api/interface_i_date_time_formatter.html#ae79d6114f4ae8a175d26a5d676e5c0a9).
 
    All three nodes can contain the following parameters:
-   - **offsetTime**, *\<double\>*, changes the time provided by KSP ***before*** calculating the current date.
-   - **offsetYear**, *\<int\>*, changes the year number ***after*** having calculated the date.
-   - **offsetDay**, *\<int\>*, changes the day number ***after*** having calculated the date.
-   - **displayDate**, *\<string\>*, which is the format used to display the date.
-   - **displayTime**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeTime = true'*.
-   - **displaySeconds**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeSeconds = true'*.
+   - **offsetTime**, *\<double\>*, changes the time provided by KSP ***before*** calculating the current date
+   - **offsetYear**, *\<int\>*, changes the year number ***after*** having calculated the date
+   - **offsetDay**, *\<int\>*, changes the day number ***after*** having calculated the date
+   - **displayDate**, *\<string\>*, which is the format used to display the date
+   - **displayTime**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeTime = true'*
+   - **displaySeconds**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeSeconds = true'*
   
   ---
   
-  
-   
+ - **Months**
+   ```
+   Kronometer
+   {
+       Months
+       {
+           Month
+           {
+           }
+           Month
+           {
+           }
+           Month
+           {
+           }
+       }
+   }
+   ```
+   This is used to define months that can be used when displaying the date.
+ 
+   All months require:
+   - **name**, *\<string\>*, which is the full name of the month (eg. *'January'*)
+   - **symbol**, *\<string\>*, which is the symbol used for the month (eg. *'Jan'*)
+   - **days**, *\<int\>*, which is the number of days in the month (eg. *'30'*)
    
    
