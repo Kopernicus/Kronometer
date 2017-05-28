@@ -21,7 +21,7 @@ namespace Kronometer
         /// Name of the config node group which manages Kronometer
         /// </summary>
         public const string rootNodeName = "Kronometer";
-        
+
         void Start()
         {
             // Get the configNode
@@ -29,7 +29,7 @@ namespace Kronometer
 
             // Parse the config node
             SettingsLoader loader = Parser.CreateObjectFromConfigNode<SettingsLoader>(kronometer);
-            
+
             if  // Make sure we need the clock and all values are defined properly
             (
                 double.PositiveInfinity > loader.Clock.hour.value &&
@@ -83,7 +83,7 @@ namespace Kronometer
             this.loader = loader;
             FormatFixer();
         }
-        
+
         /// <summary>
         /// Create a new clock formatter
         /// </summary>
@@ -372,7 +372,7 @@ namespace Kronometer
                 stringBuilder.Append((!includeTime) ? "0" + loader.Clock.day.symbol : ((!includeSeconds) ? "0" + loader.Clock.minute.symbol : "0" + loader.Clock.second.symbol));
             return stringBuilder.ToStringAndRelease();
         }
-        
+
         /// <summary>
         /// Calculates the current date
         /// This will work also when a year cannot be divided in days without a remainder
@@ -384,13 +384,19 @@ namespace Kronometer
         public virtual Date GetDate(double time)
         {
             // Current Year
-            int year = (int)(time / loader.Clock.year.value);
+            int year = (int)Math.Floor(time / loader.Clock.year.value);
 
-            // Current Day
-            int day = (int)((time / loader.Clock.day.value) - Math.Round(year * loader.Clock.year.value / loader.Clock.day.value, 0, MidpointRounding.AwayFromZero));
+            // Time passed this year
+            double timeThisYear = time - loader.Clock.year.value * year;
+
+            // Time carried over from last year
+            double CarryOver = CarryOver = loader.Clock.day.value - Math.Abs((loader.Clock.year.value % loader.Clock.day.value) * year);
+
+            // Current Day of the year
+            int day = (int)Math.Floor((timeThisYear - CarryOver) / loader.Clock.day.value.value);
 
             // Time left to count
-            double left = time % loader.Clock.day.value;
+            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -448,26 +454,26 @@ namespace Kronometer
             int year = (int)(time / shortYear);
 
             // Time left this year (calculated as if there were no leap years)
-            double timeFromPreviousYears = year * daysInOneShortYear * loader.Clock.day.value;
+            double timeFromPreviousYears = year * shortYear;
             double timeLeftThisYear = time - timeFromPreviousYears;
 
             // Current Day of the Year (calculated as if there were no leap years)
-            int day = (int)(timeLeftThisYear / loader.Clock.day.value);
+            int day = (int)Math.Floor(timeLeftThisYear / loader.Clock.day.value);
 
             // Remove the days lost to leap years
-            day -= (int)(chanceOfLeapDay * year);
+            day -= (int)Math.Floor(chanceOfLeapDay * year);
 
             // If days go negative, borrow days from the previous year
             while (day < 0)
             {
                 year--;
-                day += (int)(loader.Clock.year.value / loader.Clock.day.value) + 1;
+                day += daysInOneShortYear + 1;
             }
 
             // Now 'day' and 'year' correctly account for leap years
 
             // Time left to count
-            double left = time % loader.Clock.day.value;
+            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -496,13 +502,13 @@ namespace Kronometer
                 // Note: months reset every N years (Kronometer.resetMonths)
 
                 // Total days passed untill now
-                int daysPassedTOT = (int)(time / loader.Clock.day.value);
+                int daysPassedTOT = (int)Math.Floor(time / loader.Clock.day.value);
 
                 // Days between month resets = normal days between month resets + leap days between month resets
                 int daysBetweenResets = (daysInOneShortYear * loader.resetMonths) + (int)(chanceOfLeapDay * loader.resetMonths);
 
                 // Days passed since last month reset
-                int daysFromReset = daysPassedTOT % daysBetweenResets;
+                int daysFromReset = (daysPassedTOT % daysBetweenResets + daysBetweenResets) % daysBetweenResets;
 
 
 
@@ -547,7 +553,7 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
             // Offset time
-            time += loader.Display.CustomPrintDateNew.offsetTime;
+            time += loader.Display.CustomPrintDate.offsetTime;
 
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
@@ -571,7 +577,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month.Number(loader.calendar, loader.resetMonthNum), date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -608,7 +614,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month.Number(loader.calendar, loader.resetMonthNum), date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -625,7 +631,7 @@ namespace Kronometer
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
             // Offset time
-            time += loader.Display.CustomPrintDateNew.offsetTime;
+            time += loader.Display.CustomPrintDateCompact.offsetTime;
 
             // Get the current date
             Date date = loader.useLeapYears ? GetLeapDate(time) : GetDate(time);
@@ -649,11 +655,11 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month.Number(loader.calendar, loader.resetMonthNum), date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
-        
+
         /// <summary>
         /// Call FormatFixer on all 'DisplayLoader's 
         /// </summary>
@@ -757,8 +763,8 @@ namespace Kronometer
             .Replace("{S2}", date.seconds == 1 ? loader.Clock.second.singular : loader.Clock.second.plural)
 
             // Fix Months
-            .Replace("{Mo0}", date.month.symbol)
-            .Replace("{Mo1}", date.month.name)
+            .Replace("{Mo0}", date.month != null ? date.month.symbol : "NaM")
+            .Replace("{Mo1}", date.month != null ? date.month.name : "NaM")
 
             // Fix Days
             .Replace("{Dth}", GetOrdinal(date.day));

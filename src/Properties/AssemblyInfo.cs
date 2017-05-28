@@ -14,3 +14,5 @@ using System.Runtime.InteropServices;
 [assembly: Guid("39bdaffa-a6ef-4fde-a152-c915bbd7d4e2")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: KSPAssembly("Kronometer", 1, 0)]
+[assembly: KSPAssemblyDependency("Kopernicus.Parser", 1, 0)]
