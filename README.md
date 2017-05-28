@@ -111,6 +111,33 @@ The Kronometer root node contains five general settings and three nodes for more
   
   ---
   
+ - **Months**
+   ```
+   Kronometer
+   {
+       Months
+       {
+           Month
+           {
+           }
+           Month
+           {
+           }
+           Month
+           {
+           }
+       }
+   }
+   ```
+   This is used to define months that can be used when displaying the date.
+ 
+   All months require:
+   - **name**, *\<string\>*, which is the full name of the month (eg. *'January'*)
+   - **symbol**, *\<string\>*, which is the symbol used for the month (eg. *'Jan'*)
+   - **days**, *\<int\>*, which is the number of days in the month (eg. *'30'*)
+   
+  ---
+  
  - **DisplayDate**
    ```
    Kronometer
@@ -143,31 +170,15 @@ The Kronometer root node contains five general settings and three nodes for more
    - **displayTime**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeTime = true'*
    - **displaySeconds**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeSeconds = true'*
   
-  ---
+   **Custom Format:**
   
- - **Months**
-   ```
-   Kronometer
-   {
-       Months
-       {
-           Month
-           {
-           }
-           Month
-           {
-           }
-           Month
-           {
-           }
-       }
-   }
-   ```
-   This is used to define months that can be used when displaying the date.
- 
-   All months require:
-   - **name**, *\<string\>*, which is the full name of the month (eg. *'January'*)
-   - **symbol**, *\<string\>*, which is the symbol used for the month (eg. *'Jan'*)
-   - **days**, *\<int\>*, which is the number of days in the month (eg. *'30'*)
-   
-   
+   **displayDate**, **displayTime** and **displaySeconds** use
+   ***[.NET Framework composite formatting](https://msdn.microsoft.com/en-us/library/txafckwd(v=vs.110).aspx)***
+   with a few minor changes:
+   - angle brackets (```<``` and ```>```) are used instead of curly brackets (```{``` and ```}```)
+   - ```<Y>```, ```<D>```, ```<H>```, ```<M>```, ```<S>``` are used to get the symbol of the chosen unit of time
+   - ```<Y0>```, ```<D0>```, ```<H0>```, ```<M0>```, ```<S0>``` are used to get the symbol of the chosen unit of time
+   - ```<Y1>```, ```<D1>```, ```<H1>```, ```<M1>```, ```<S1>``` are used to get the singular of the chosen unit of time
+   - ```<Y2>```, ```<D2>```, ```<H2>```, ```<M2>```, ```<S2>``` are used to get the plural or the singular of the chosen unit of time (depending on the date)
+   - to add an angle brackets, use two of the same back to back (```<<``` to get ```<```, and ```>>``` to get ```>```)
+   - to add spaces at the beginning or end of the string, open an angle bracket and add a space (```< ``` to get '``` ```')
