@@ -58,7 +58,7 @@ The Kronometer root node contains five general settings and three nodes for more
   >    Day 0 will last untill Day 365 would have ended, then Day 1 will start.
   >
   >
-  >  - **In both cases**: the time shown by the clock will always be consistent with the position of the sun in the sky.
+  >  - **In both cases**: a new day will not start earlier just because a year has ended.
   >  
 
 - **resetMonthNumAfterMonths**
@@ -69,9 +69,9 @@ The Kronometer root node contains five general settings and three nodes for more
   
  - **resetMonthsAfterYears**
  
- *Integer, default value = 1*
+  *Integer, default value = 1*
  
- 
+  > This number defines how many years can pass before the calendar starts over from the first month.
  
  
  
