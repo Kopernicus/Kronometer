@@ -176,9 +176,11 @@ The Kronometer root node contains five general settings and three nodes for more
    ***[.NET Framework composite formatting](https://msdn.microsoft.com/en-us/library/txafckwd(v=vs.110).aspx)***
    with a few minor changes:
    - angle brackets (```<``` and ```>```) are used instead of curly brackets (```{``` and ```}```)
-   - ```<Y>```, ```<D>```, ```<H>```, ```<M>```, ```<S>``` are used to get the symbol of the chosen unit of time
-   - ```<Y0>```, ```<D0>```, ```<H0>```, ```<M0>```, ```<S0>``` are used to get the symbol of the chosen unit of time
-   - ```<Y1>```, ```<D1>```, ```<H1>```, ```<M1>```, ```<S1>``` are used to get the singular of the chosen unit of time
-   - ```<Y2>```, ```<D2>```, ```<H2>```, ```<M2>```, ```<S2>``` are used to get the plural or the singular of the chosen unit of time (depending on the date)
-   - to add an angle brackets, use two of the same back to back (```<<``` to get ```<```, and ```>>``` to get ```>```)
+   - ```<Y>```, ```<D>```, ```<H>```, ```<M>```, ```<S>``` are used to get the **current number** of the chosen unit of time
+   - ```<Y0>```, ```<D0>```, ```<H0>```, ```<M0>```, ```<S0>``` are used to get the **symbol** of the chosen unit of time
+   - ```<Y1>```, ```<D1>```, ```<H1>```, ```<M1>```, ```<S1>``` are used to get the **singular** of the chosen unit of time
+   - ```<Y2>```, ```<D2>```, ```<H2>```, ```<M2>```, ```<S2>``` are used to get the **plural or singular** of the chosen unit of time <sub><sup>(depending on the date)</sup></sub>
+   - ```<Mo>```, ```<Mo0>```, ```<Mo1>``` are used to get **number**, **symbol** or **name** of the current month
+   - ```<Dth>``` is used to get the cardinal suffix (```st```, ```nd```, ```rd``` or ```th```) for the number of the current day
+   - to add an angle bracket, use two of the same back to back (```<<``` to get ```<```, and ```>>``` to get ```>```)
    - to add spaces at the beginning or end of the string, open an angle bracket and add a space (```< ``` to get '``` ```')
