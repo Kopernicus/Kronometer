@@ -55,7 +55,7 @@ namespace Kronometer
         }
 
         // This defines after how many years the actual months will reset back to the first month
-        public Int32 resetMonths { get; set; }
+        public Int32 resetMonths = 1;
 
         [ParserTarget("resetMonthsAfterYears")]
         private NumericParser<int> resetMonthsLoader
