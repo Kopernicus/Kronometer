@@ -73,9 +73,30 @@ The Kronometer root node contains five general settings and three nodes for more
   
    > This number defines how many years can pass before the calendar starts over from the first month.
   
-  
- 
- 
+ - **CustomTime**
+   ```
+   Kronometer
+   {
+       CustomTime
+       {
+           Year
+           {
+           }
+           Day
+           {
+           }
+           Hour
+           {
+           }
+           Minute
+           {
+           }
+           Second
+           {
+           }
+       }
+   }
+   ```
  
  
  
