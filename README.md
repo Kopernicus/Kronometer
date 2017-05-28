@@ -7,7 +7,7 @@ A mod to manipulate the clock for Kerbal Space Program. It was previously a part
 
 This mod is licensed under the Terms of the MIT License. It was previously licensed under the LGPL License.
 
-### Downloads
+## Downloads
 
 - [Latest Release](https://github.com/StollD/Kronometer/releases/latest)
 
@@ -107,5 +107,26 @@ The Kronometer root node contains five general settings and three nodes for more
    - *symbol*, which is the symbol used for the time unit (eg. *'y'*)
    - *value*, which is the duration in 'real life seconds' of the time unit (eg. *'9201600'*)
  
- 
- 
+ - **DisplayDate**
+   ```
+   Kronometer
+   {
+       DisplayDate
+       {
+           PrintDate
+           {
+           }
+           PrintDateNew
+           {
+           }
+           PrintDateCompact
+           {
+           }
+       }
+   }
+   ```
+   This is used to change how KSP displays the date when using
+   [*PrintDate*](https://kerbalspaceprogram.com/api/interface_i_date_time_formatter.html#a1925dd76af3a9a62ff77cfa0075da03f), 
+   [*PrintDateNew*](https://kerbalspaceprogram.com/api/interface_i_date_time_formatter.html#a9f178261dbd9ecd419325690631db4fc) 
+   and 
+   [*PrintDateCompact*](https://kerbalspaceprogram.com/api/interface_i_date_time_formatter.html#ae79d6114f4ae8a175d26a5d676e5c0a9).
