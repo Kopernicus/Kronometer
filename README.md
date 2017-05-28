@@ -76,6 +76,8 @@ The Kronometer root node contains five general settings and three nodes for more
   
    > This number defines how many years can pass before the calendar starts over from the first month.
   
+  ---
+  
  - **CustomTime**
    ```
    Kronometer
@@ -106,7 +108,9 @@ The Kronometer root node contains five general settings and three nodes for more
    - **plural**, *\<string\>*, which is the plural name of the time unit (eg. *'Years'*)
    - **symbol**, *\<string\>*, which is the symbol used for the time unit (eg. *'y'*)
    - **value**, *\<double\>*, which is the duration in 'real life seconds' of the time unit (eg. *'9201600'*)
- 
+  
+  ---
+  
  - **DisplayDate**
    ```
    Kronometer
@@ -138,6 +142,10 @@ The Kronometer root node contains five general settings and three nodes for more
    - **displayDate**, *\<string\>*, which is the format used to display the date.
    - **displayTime**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeTime = true'*.
    - **displaySeconds**, *\<string\>*, which is added to ***'displayDate'*** when KSP provides *'includeSeconds = true'*.
+  
+  ---
+  
+  
    
    
    
