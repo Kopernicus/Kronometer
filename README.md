@@ -68,15 +68,12 @@ The Kronometer root node contains five general settings and three nodes for more
   > The number assigned to each month can go up to this number. If the number of months is higher than this value, some months will have the same number.
   
  - **resetMonthsAfterYears**
- 
-  *Integer, default value = 1*
- 
-  > This number defines how many years can pass before the calendar starts over from the first month.
- 
- 
- 
- 
- 
+
+   *Integer, default value = 1*
+  
+   > This number defines how many years can pass before the calendar starts over from the first month.
+  
+  
  
  
  
