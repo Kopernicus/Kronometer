@@ -145,7 +145,7 @@ namespace Kronometer
     public class DisplayLoader
     {
         [ParserTarget("offsetTime")]
-        public NumericParser<int> offsetTime;
+        public NumericParser<double> offsetTime;
 
         [ParserTarget("offsetYear")]
         public NumericParser<int> offsetYear;
@@ -162,7 +162,7 @@ namespace Kronometer
         [ParserTarget("displaySeconds")]
         public string displaySeconds;
 
-        public DisplayLoader(int offsetTime, int offsetYear, int offsetDay, string displayDate, string displayTime, string displaySeconds)
+        public DisplayLoader(double offsetTime, int offsetYear, int offsetDay, string displayDate, string displayTime, string displaySeconds)
         {
             this.offsetTime = offsetTime;
             this.offsetYear = offsetYear;
