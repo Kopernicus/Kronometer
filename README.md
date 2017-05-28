@@ -97,8 +97,12 @@ The Kronometer root node contains five general settings and three nodes for more
        }
    }
    ```
- 
- 
+   This is used to change the definitions of the five units of time used by KSP: *Year*, *Day*, *Hour*, *Minute* and *Second*.
+   
+   - *singular*, which is the singular name of the time unit (eg. *'Year'*)
+   - *plural*, which is the plural name of the time unit (eg. *'Years'*)
+   - *symbol*, which is the symbol used for the time unit (eg. *'y'*)
+   - *value*, which is the duration in 'real life seconds' of the time unit (eg. *'9201600'*)
  
  
  
