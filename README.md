@@ -54,11 +54,9 @@ The Kronometer root node contains five general settings and three nodes for more
   >
   >  - **When *'true'***:
   >
-  >    if the year ends halfway through a day, the clock will go:
+  >    at the end of a day, if there is not enough time left in the year to fit another full day,
   >
-  >    Year 1 Day 365   ==>   Year 2 Day 0    (Instead of starting directly with Day 1)
-  >
-  >    Day 0 will last untill Day 365 would have ended, then Day 1 will start.
+  >    the current year will end as well, and the new day will be the first day of the next year
   >
   >
   >  - **In both cases**: a new day will not start earlier just because a year has ended.
