@@ -55,14 +55,29 @@ namespace Kronometer
                 loader.Clock.year.value = Math.Abs(loader.Clock.year.value);
                 loader.Clock.day.value = Math.Abs(loader.Clock.day.value);
 
-                // If weird numbers, abort
-                if (double.IsInfinity(loader.Clock.day.value) || double.IsNaN(loader.Clock.day.value) || double.IsInfinity(loader.Clock.year.value) || double.IsNaN(loader.Clock.year.value))
-                {
-                    return;
-                }
+                // Round values where it is required
+                if (loader.Clock.year.round)
+                    loader.Clock.year.value = Math.Round(loader.Clock.year.value, 0);
+                if (loader.Clock.day.round)
+                    loader.Clock.day.value = Math.Round(loader.Clock.day.value, 0);
+                if (loader.Clock.hour.round)
+                    loader.Clock.hour.value = Math.Round(loader.Clock.hour.value, 0);
+                if (loader.Clock.minute.round)
+                    loader.Clock.minute.value = Math.Round(loader.Clock.minute.value, 0);
+                if (loader.Clock.second.round)
+                    loader.Clock.second.value = Math.Round(loader.Clock.second.value, 0);
 
-                // Replace the stock Formatter
-                KSPUtil.dateTimeFormatter = new ClockFormatter(loader);
+                if  // Make sure we still need the clock and all values are still defined properly
+                (
+                    double.PositiveInfinity > loader.Clock.hour.value &&
+                    loader.Clock.hour.value > loader.Clock.minute.value &&
+                    loader.Clock.minute.value > loader.Clock.second.value &&
+                    loader.Clock.second.value > 0
+                )
+                {
+                    // Replace the stock Formatter
+                    KSPUtil.dateTimeFormatter = new ClockFormatter(loader);
+                }
             }
         }
     }
