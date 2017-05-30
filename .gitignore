@@ -22,6 +22,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 *.dll
+!Distribution/Release/GameData/Kronometer/Plugins/Kronometer.dll
 
 # Visual Studio 2015 cache/options directory
 .vs/
