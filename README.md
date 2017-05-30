@@ -106,6 +106,7 @@ The Kronometer root node contains five general settings and three nodes for more
    - **plural**, *\<string\>*, which is the plural name of the time unit (eg. *'Years'*)
    - **symbol**, *\<string\>*, which is the symbol used for the time unit (eg. *'y'*)
    - **value**, *\<double\>*, which is the duration in 'real life seconds' of the time unit (eg. *'9201600'*)
+   - **roundToNearestInt**, *\<bool\>*, which (if true) makes sure the 'value' is an integer number
   
   ---
   
