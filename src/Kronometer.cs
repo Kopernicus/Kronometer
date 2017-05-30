@@ -404,14 +404,20 @@ namespace Kronometer
             // Time passed this year
             double timeThisYear = time - loader.Clock.year.value * year;
 
+            // Time carried over each year
+            double AnnualCarryOver = MOD(loader.Clock.year.value, loader.Clock.day.value);
+
+            // Time carried over to this day
+            double TotalCarryOver = AnnualCarryOver * year;
+
             // Time carried over from last year
-            double CarryOver = CarryOver = loader.Clock.day.value - Math.Abs((loader.Clock.year.value % loader.Clock.day.value) * year);
+            double CarryOver = MOD(TotalCarryOver, loader.Clock.day.value);
 
             // Current Day of the year
             int day = (int)Math.Floor((timeThisYear - CarryOver) / loader.Clock.day.value.value);
 
             // Time left to count
-            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
+            double left = MOD(time, loader.Clock.day.value);
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -824,6 +830,17 @@ namespace Kronometer
                 return "-Inf";
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns the remainder after number is divided by divisor. The result has the same sign as divisor.
+        /// </summary>
+        /// <param name="number">The number for which you want to find the remainder.</param>
+        /// <param name="divisor">The number by which you want to divide number.</param>
+        /// <returns></returns>
+        public double MOD(double number, double divisor)
+        {
+            return (number % divisor + divisor) % divisor;
         }
 
         public virtual int Second
