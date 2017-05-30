@@ -842,7 +842,9 @@ namespace Kronometer
         {
             return (number % divisor + divisor) % divisor;
         }
-
+        
+        /// In these Properties is stored the length of each time unit in game seconds
+        /// These can be found in stock as well, and should be used by other mods that deal with time
         public virtual int Second
         {
             get { return (int)loader.Clock.second.value; }
