@@ -405,7 +405,7 @@ namespace Kronometer
             double timeThisYear = time - loader.Clock.year.value * year;
 
             // Time carried over each year
-            double AnnualCarryOver = MOD(loader.Clock.year.value, loader.Clock.day.value);
+            double AnnualCarryOver = loader.Clock.year.value % loader.Clock.day.value;
 
             // Time carried over to this day
             double TotalCarryOver = AnnualCarryOver * year;
@@ -494,7 +494,7 @@ namespace Kronometer
             // Now 'day' and 'year' correctly account for leap years
 
             // Time left to count
-            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
+            double left = MOD(time, loader.Clock.day.value);
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -529,7 +529,7 @@ namespace Kronometer
                 int daysBetweenResets = (daysInOneShortYear * loader.resetMonths) + (int)(chanceOfLeapDay * loader.resetMonths);
 
                 // Days passed since last month reset
-                int daysFromReset = (daysPassedTOT % daysBetweenResets + daysBetweenResets) % daysBetweenResets;
+                int daysFromReset = (int)MOD(daysPassedTOT, daysBetweenResets);
 
 
 
