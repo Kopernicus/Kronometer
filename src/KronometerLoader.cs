@@ -112,12 +112,16 @@ namespace Kronometer
         [ParserTarget("value")]
         public NumericParser<double> value;
 
-        public TimeUnits(string singular, string plural, string symbol, double value)
+        [ParserTarget("roundToNearestInt")]
+        public NumericParser<bool> round;
+
+        public TimeUnits(string singular, string plural, string symbol, double value, bool round = false)
         {
             this.singular = singular;
             this.plural = plural;
             this.symbol = symbol;
-            this.value = value;
+            this.value = round ? Math.Round(value, 0) : value;
+            this.round = round;
         }
     }
 

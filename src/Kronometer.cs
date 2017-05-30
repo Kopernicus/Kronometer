@@ -55,14 +55,29 @@ namespace Kronometer
                 loader.Clock.year.value = Math.Abs(loader.Clock.year.value);
                 loader.Clock.day.value = Math.Abs(loader.Clock.day.value);
 
-                // If weird numbers, abort
-                if (double.IsInfinity(loader.Clock.day.value) || double.IsNaN(loader.Clock.day.value) || double.IsInfinity(loader.Clock.year.value) || double.IsNaN(loader.Clock.year.value))
-                {
-                    return;
-                }
+                // Round values where it is required
+                if (loader.Clock.year.round)
+                    loader.Clock.year.value = Math.Round(loader.Clock.year.value, 0);
+                if (loader.Clock.day.round)
+                    loader.Clock.day.value = Math.Round(loader.Clock.day.value, 0);
+                if (loader.Clock.hour.round)
+                    loader.Clock.hour.value = Math.Round(loader.Clock.hour.value, 0);
+                if (loader.Clock.minute.round)
+                    loader.Clock.minute.value = Math.Round(loader.Clock.minute.value, 0);
+                if (loader.Clock.second.round)
+                    loader.Clock.second.value = Math.Round(loader.Clock.second.value, 0);
 
-                // Replace the stock Formatter
-                KSPUtil.dateTimeFormatter = new ClockFormatter(loader);
+                if  // Make sure we still need the clock and all values are still defined properly
+                (
+                    double.PositiveInfinity > loader.Clock.hour.value &&
+                    loader.Clock.hour.value > loader.Clock.minute.value &&
+                    loader.Clock.minute.value > loader.Clock.second.value &&
+                    loader.Clock.second.value > 0
+                )
+                {
+                    // Replace the stock Formatter
+                    KSPUtil.dateTimeFormatter = new ClockFormatter(loader);
+                }
             }
         }
     }
@@ -389,14 +404,20 @@ namespace Kronometer
             // Time passed this year
             double timeThisYear = time - loader.Clock.year.value * year;
 
+            // Time carried over each year
+            double AnnualCarryOver = loader.Clock.year.value % loader.Clock.day.value;
+
+            // Time carried over to this day
+            double TotalCarryOver = AnnualCarryOver * year;
+
             // Time carried over from last year
-            double CarryOver = CarryOver = loader.Clock.day.value - Math.Abs((loader.Clock.year.value % loader.Clock.day.value) * year);
+            double CarryOver = MOD(TotalCarryOver, loader.Clock.day.value);
 
             // Current Day of the year
             int day = (int)Math.Floor((timeThisYear - CarryOver) / loader.Clock.day.value.value);
 
             // Time left to count
-            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
+            double left = MOD(time, loader.Clock.day.value);
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -473,7 +494,7 @@ namespace Kronometer
             // Now 'day' and 'year' correctly account for leap years
 
             // Time left to count
-            double left = (time % loader.Clock.day.value + loader.Clock.day.value) % loader.Clock.day.value;
+            double left = MOD(time, loader.Clock.day.value);
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -508,7 +529,7 @@ namespace Kronometer
                 int daysBetweenResets = (daysInOneShortYear * loader.resetMonths) + (int)(chanceOfLeapDay * loader.resetMonths);
 
                 // Days passed since last month reset
-                int daysFromReset = (daysPassedTOT % daysBetweenResets + daysBetweenResets) % daysBetweenResets;
+                int daysFromReset = (int)MOD(daysPassedTOT, daysBetweenResets);
 
 
 
@@ -811,6 +832,19 @@ namespace Kronometer
             return null;
         }
 
+        /// <summary>
+        /// Returns the remainder after number is divided by divisor. The result has the same sign as divisor.
+        /// </summary>
+        /// <param name="number">The number for which you want to find the remainder.</param>
+        /// <param name="divisor">The number by which you want to divide number.</param>
+        /// <returns></returns>
+        public double MOD(double number, double divisor)
+        {
+            return (number % divisor + divisor) % divisor;
+        }
+        
+        /// In these Properties is stored the length of each time unit in game seconds
+        /// These can be found in stock as well, and should be used by other mods that deal with time
         public virtual int Second
         {
             get { return (int)loader.Clock.second.value; }
