@@ -5,8 +5,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 using Kopernicus;
@@ -85,6 +83,14 @@ namespace Kronometer
     // THIS IS THE REAL STUFF!
     public class ClockFormatter : IDateTimeFormatter
     {
+        /// <summary>
+        /// Required by IDateTimeFormatter
+        /// </summary>
+        public string PrintTime(double time, int valuesOfInterest, bool explicitPositive, bool logEnglish)
+        {
+            return PrintTime(time, valuesOfInterest, explicitPositive);
+        }
+
         /// <summary>
         /// The object that contains the settings for the new clock
         /// </summary>
@@ -437,13 +443,15 @@ namespace Kronometer
             // Get Month
             Month month = null;
 
-            foreach (Month Mo in loader.calendar)
+            for (int i = 0; i < loader?.calendar?.Count; i++)
             {
+                Month Mo = loader.calendar[i];
+
                 month = Mo;
 
                 if (day < Mo.days)
                     break;
-                else if (Mo != loader.calendar.Last())
+                else if (Mo != loader.calendar[loader.calendar.Count - 1])
                     day -= Mo.days;
             }
 
@@ -534,14 +542,16 @@ namespace Kronometer
 
 
                 // Go through each month in the calendar
-                foreach (Month Mo in loader.calendar)
+                for (int i = 0; i < loader?.calendar?.Count; i++)
                 {
+                    Month Mo = loader.calendar[i];
+
                     month = Mo;
 
                     // If there are more days left than there are in this month
                     // AND
                     // this is not the last month of the calendar
-                    if (daysFromReset >= Mo.days && Mo != loader.calendar.Last())
+                    if (daysFromReset >= Mo.days && Mo != loader.calendar[loader.calendar.Count - 1])
                     {
                         // Remove this month worth of days and move on to check next month
                         daysFromReset -= Mo.days;
@@ -842,7 +852,7 @@ namespace Kronometer
         {
             return (number % divisor + divisor) % divisor;
         }
-        
+
         /// In these Properties is stored the length of each time unit in game seconds
         /// These can be found in stock as well, and should be used by other mods that deal with time
         public virtual int Second
