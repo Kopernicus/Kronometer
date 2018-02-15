@@ -29,11 +29,11 @@ namespace Kronometer
         public NumericParser<bool> useLeapYears = new NumericParser<bool>(false);
 
         // Load Custom Time
-        [ParserTarget("CustomTime", allowMerge = true, optional = true)]
+        [ParserTarget("CustomTime", AllowMerge = true, Optional = true)]
         public ClockLoader Clock = new ClockLoader();
 
         // Load Custom Months
-        [ParserTargetCollection("Months", allowMerge = true)]
+        [ParserTargetCollection("Months", AllowMerge = true)]
         public List<Month> calendar = new List<Month>();
 
         // This defines after how many months the number displayed will reset back to 1
@@ -68,7 +68,7 @@ namespace Kronometer
         }
 
         // Load Custom Display
-        [ParserTarget("DisplayDate", allowMerge = true, optional = true)]
+        [ParserTarget("DisplayDate", AllowMerge = true, Optional = true)]
         public CustomDisplay Display = new CustomDisplay();
     }
 
@@ -78,19 +78,19 @@ namespace Kronometer
     [RequireConfigType(ConfigType.Node)]
     public class ClockLoader
     {
-        [ParserTarget("Second", allowMerge = true)]
+        [ParserTarget("Second", AllowMerge = true)]
         public TimeUnits second = new TimeUnits("Second", "Seconds", "s", 1);
 
-        [ParserTarget("Minute", allowMerge = true)]
+        [ParserTarget("Minute", AllowMerge = true)]
         public TimeUnits minute = new TimeUnits("Minute", "Minutes", "m", 60);
 
-        [ParserTarget("Hour", allowMerge = true)]
+        [ParserTarget("Hour", AllowMerge = true)]
         public TimeUnits hour = new TimeUnits("Hour", "Hours", "h", 3600);
 
-        [ParserTarget("Day", allowMerge = true)]
+        [ParserTarget("Day", AllowMerge = true)]
         public TimeUnits day = new TimeUnits("Day", "Days", "d", 3600 * (GameSettings.KERBIN_TIME ? 6 : 24));
 
-        [ParserTarget("Year", allowMerge = true)]
+        [ParserTarget("Year", AllowMerge = true)]
         public TimeUnits year = new TimeUnits("Year", "Years", "y", 3600 * (GameSettings.KERBIN_TIME ? 6 * 426 : 24 * 365));
     }
 
@@ -131,13 +131,13 @@ namespace Kronometer
     [RequireConfigType(ConfigType.Node)]
     public class CustomDisplay
     {
-        [ParserTarget("PrintDate", allowMerge = true)]
+        [ParserTarget("PrintDate", AllowMerge = true)]
         public DisplayLoader CustomPrintDate = new DisplayLoader(0, 1, 1, "<Y1> <Y>, <D1> <D>", " - <H><H0><M><M0>", ", <S><S0>");
 
-        [ParserTarget("PrintDateNew", allowMerge = true)]
+        [ParserTarget("PrintDateNew", AllowMerge = true)]
         public DisplayLoader CustomPrintDateNew = new DisplayLoader(0, 1, 1, "<Y1> <Y>, <D1> <D>", " - <H:D2>:<M:D2>:<S:D2>", "");
 
-        [ParserTarget("PrintDateCompact", allowMerge = true)]
+        [ParserTarget("PrintDateCompact", AllowMerge = true)]
         public DisplayLoader CustomPrintDateCompact = new DisplayLoader(0, 1, 1, "<Y0><Y>, <D0><D:00>", ", <H>:<M:00>", ":<S:00>");
     }
 
