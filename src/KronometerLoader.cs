@@ -6,7 +6,9 @@
 
 using System;
 using System.Collections.Generic;
-using Kopernicus;
+using Kopernicus.ConfigParser.Attributes;
+using Kopernicus.ConfigParser.BuiltinTypeParsers;
+using Kopernicus.ConfigParser.Enumerations;
 
 namespace Kronometer
 {

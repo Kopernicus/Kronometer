@@ -7,7 +7,7 @@
 using System;
 using System.Text;
 using UnityEngine;
-using Kopernicus;
+using Kopernicus.ConfigParser;
 
 namespace Kronometer
 {
