@@ -407,20 +407,17 @@ namespace Kronometer
             // Current Year
             int year = (int)Math.Floor(time / loader.Clock.year.value);
 
-            // Time passed this year
-            double timeThisYear = time - loader.Clock.year.value * year;
-
             // Time carried over each year
             double AnnualCarryOver = loader.Clock.year.value % loader.Clock.day.value;
 
-            // Time carried over to this day
-            double TotalCarryOver = AnnualCarryOver * year;
+            // Time carried over this year
+            double CarryOverThisYear = MOD(AnnualCarryOver * year, loader.Clock.day.value);
 
-            // Time carried over from last year
-            double CarryOver = MOD(TotalCarryOver, loader.Clock.day.value);
+            // Time passed this year
+            double timeThisYear = MOD(time, loader.Clock.year.value) + CarryOverThisYear;
 
             // Current Day of the year
-            int day = (int)Math.Floor((timeThisYear - CarryOver) / loader.Clock.day.value.Value);
+            int day = (int)Math.Floor(timeThisYear / loader.Clock.day.value.Value) - (int)Math.Ceiling(CarryOverThisYear / loader.Clock.day.value.Value);
 
             // Time left to count
             double left = MOD(time, loader.Clock.day.value);
