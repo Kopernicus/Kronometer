@@ -9,7 +9,7 @@ This mod is licensed under the Terms of the MIT License. It was previously licen
 
 ## Downloads
 
-- [Latest Release](https://github.com/StollD/Kronometer/releases/latest)
+- [Latest Release](https://github.com/Kopernicus/Kronometer/releases/latest)
 
 ### Credits
 Sigma88 wrote most of the original code, Thomas P. made various improvements. The name is an idea of the IRC user "acc"
@@ -48,9 +48,9 @@ The Kronometer root node contains five general settings and three nodes for more
   >
   >    if the year ends halfway through a day, the clock will go:
   >
-  >    Year 1 Day 365   ==>   Year 2 Day 0    (Instead of starting directly with Day 1)
+  >    Year 1 Day 365   ==>   Year 2 Day 1    (Hours, Minutes and Seconds do not reset)
   >
-  >    Day 0 will last untill Day 365 would have ended, then Day 1 will start.
+  >    Day 1 will last untill Day 365 would have ended, then Day 2 will start.
   >
   >  - **When *'true'***:
   >

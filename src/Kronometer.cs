@@ -398,8 +398,8 @@ namespace Kronometer
         /// Calculates the current date
         /// This will work also when a year cannot be divided in days without a remainder
         /// If the year ends halfway through a day, the clock will go:
-        /// Year 1 Day 365   ==>   Year 2 Day 0    (Instead of starting directly with Day 1)
-        /// Day 0 will last untill Day 365 would have ended, then Day 1 will start.
+        /// Year 1 Day 365   ==>   Year 2 Day 1    (Hours, Minutes and Seconds do not reset)
+        /// Day 1 will last untill Day 365 would have ended, then Day 2 will start.
         /// This way the time shown by the clock will always be consistent with the position of the sun in the sky
         /// </summary>
         public virtual Date GetDate(double time)
