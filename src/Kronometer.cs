@@ -417,7 +417,7 @@ namespace Kronometer
             double timeThisYear = MOD(time, loader.Clock.year.value) + CarryOverThisYear;
 
             // Current Day of the year
-            int day = (int)Math.Floor(timeThisYear / loader.Clock.day.value.Value) - (int)Math.Ceiling(CarryOverThisYear / loader.Clock.day.value.Value);
+            int day = (int)Math.Floor(timeThisYear / loader.Clock.day.value.Value);
 
             // Time left to count
             double left = MOD(time, loader.Clock.day.value);
