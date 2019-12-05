@@ -476,45 +476,49 @@ namespace Kronometer
             // Number of days in a short (non-leap) year
             int daysInOneShortYear = (int)(shortYear / loader.Clock.day.value);
 
-            // Current Year (calculated as if there were no leap years)
-            int year = (int)(time / shortYear);
+            // Time left to count
+            double left = time;
 
-            // Time left this year (calculated as if there were no leap years)
-            double timeFromPreviousYears = year * shortYear;
-            double timeLeftThisYear = time - timeFromPreviousYears;
+            double leap = 0;
+            int year = 0;
+            int day = 0;
+            int hours = 0;
+            int minutes = 0;
+            int seconds = 0;
 
-            // Current Day of the Year (calculated as if there were no leap years)
-            int day = (int)Math.Floor(timeLeftThisYear / loader.Clock.day.value);
+            //Console.WriteLine("time = " + time);
 
-            // Remove the days lost to leap years
-            day -= (int)Math.Floor(chanceOfLeapDay * year);
-
-            // If days go negative, borrow days from the previous year
-            while (day < 0)
+            while (!(left < shortYear))
             {
-                year--;
-                day += daysInOneShortYear + 1;
+                left -= shortYear;
+                leap += chanceOfLeapDay;
+                year += 1;
+                while (!(leap < 1))
+                {
+                    leap -= 1;
+
+                    if (!(left < loader.Clock.day.value))
+                    {
+                        left -= loader.Clock.day.value;
+                    }
+                    else
+                    {
+                        year -= 1;
+                        day += daysInOneShortYear;
+                    }
+                }
             }
 
-            // Now 'day' and 'year' correctly account for leap years
+            day += (int)(left / loader.Clock.day.value);
+            left -= (int)(left / loader.Clock.day.value) * loader.Clock.day.value;
 
-            // Time left to count
-            double left = MOD(time, loader.Clock.day.value);
+            hours = (int)(left / 3600);
+            left -= hours * 3600;
 
-            // Number of hours in this day
-            int hours = (int)(left / loader.Clock.hour.value);
+            minutes = (int)(left / 60);
+            left -= minutes * 60;
 
-            // Time left to count
-            left = left - hours * loader.Clock.hour.value;
-
-            // Number of minutes in this hour
-            int minutes = (int)(left / loader.Clock.minute.value);
-
-            // Time left to count
-            left = left - minutes * loader.Clock.minute.value;
-
-            // Number of seconds in this minute
-            int seconds = (int)(left / loader.Clock.second.value);
+            seconds = (int)left;
 
             // DATE CALCULATION COMPLETE
 
