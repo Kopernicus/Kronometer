@@ -567,7 +567,7 @@ namespace Kronometer
                     // If we run out of months, the last month will last until the next reset
                 }
 
-                // Set 'day' as 'day of the month'
+                // Set 'dayOfMonth' as 'day of the month'
                 dayOfMonth = daysFromReset;
             }
 
@@ -598,8 +598,8 @@ namespace Kronometer
 
             // Offset years and days
             date.year += loader.Display.CustomPrintDate.offsetYear;
-            date.day += loader.Display.CustomPrintDate.offsetDay;
             date.dayOfMonth += loader.Display.CustomPrintDate.offsetDay;
+            date.day += loader.Display.CustomPrintDate.offsetDay;
 
             // The format in which we will display the date
             string format = loader.Display.CustomPrintDate.displayDate;
@@ -640,6 +640,7 @@ namespace Kronometer
 
             // Offset years and days
             date.year += loader.Display.CustomPrintDateNew.offsetYear;
+            date.dayOfMonth += loader.Display.CustomPrintDateNew.offsetDay;
             date.day += loader.Display.CustomPrintDateNew.offsetDay;
 
             // The format in which we will display the date
@@ -653,7 +654,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.dayOfMonth, date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -677,6 +678,7 @@ namespace Kronometer
 
             // Offset years and days
             date.year += loader.Display.CustomPrintDateCompact.offsetYear;
+            date.dayOfMonth += loader.Display.CustomPrintDateCompact.offsetDay;
             date.day += loader.Display.CustomPrintDateCompact.offsetDay;
 
             // The format in which we will display the date
@@ -694,7 +696,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.dayOfMonth, date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -726,9 +728,11 @@ namespace Kronometer
         /// RULES:
         /// Angle brackets are used in place of curly brackets
         /// </summary>
-        /// <Y> <Mo> <D> <M> <H> <S>         - number of the relative unit in the date
+        /// <Y> <Mo> <Dm> <D> <M> <H> <S>    - number of the relative unit in the date*
         /// <Y0> <D0> <M0> <H0> <S0>         - symbol of the relative unit
         /// <Y1> <D1> <M1> <H1> <S1>         - singular name of the relative unit
+        /// 
+        /// *note: <D> is the day of the year, <Dm> is the day of the month
         public virtual string FormatFixer(string format)
         {
             return format
@@ -792,7 +796,8 @@ namespace Kronometer
         /// Angle brackets are used in place of curly brackets
         /// <Mo0> <Mo1>                  - symbol and name of the required month
         /// <Y2> <D2> <M2> <H2> <S2>     - plural name of the relative unit (uses singular when the number is 1)
-        /// <Dth>                        - ordinal suffix for the number of the day ("st", "nd", "rd", "th")
+        /// <Dmth>                       - ordinal suffix for the number of the day of the month ("st", "nd", "rd", "th")
+        /// <Dth>                        - ordinal suffix for the number of the day of the year  ("st", "nd", "rd", "th")
         /// </summary>
         public virtual string FormatFixer(string format, Date date)
         {
@@ -810,7 +815,8 @@ namespace Kronometer
             .Replace("{Mo1}", date.month != null ? date.month.name : "NaM")
 
             // Fix Days
-            .Replace("{Dth}", GetOrdinal(date.day));
+            .Replace("{Dth}", GetOrdinal(date.day))
+            .Replace("{Dmth}", GetOrdinal(date.dayOfMonth));
         }
 
         /// <summary>
