@@ -53,6 +53,10 @@ namespace Kronometer
                 loader.Clock.year.value = Math.Abs(loader.Clock.year.value);
                 loader.Clock.day.value = Math.Abs(loader.Clock.day.value);
 
+                // Fix Months
+                if (loader.resetMonthNum == 0)
+                    loader.resetMonthNum = loader.calendar?.Count ?? 1;
+
                 // Round values where it is required
                 if (loader.Clock.year.round)
                     loader.Clock.year.value = Math.Round(loader.Clock.year.value, 0);
