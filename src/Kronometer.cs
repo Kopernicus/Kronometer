@@ -443,6 +443,7 @@ namespace Kronometer
 
             // Get Month
             Month month = null;
+            int dayOfMonth = day;
 
             for (int i = 0; i < loader?.calendar?.Count; i++)
             {
@@ -450,13 +451,13 @@ namespace Kronometer
 
                 month = Mo;
 
-                if (day < Mo.days)
+                if (dayOfMonth < Mo.days)
                     break;
                 else if (Mo != loader.calendar[loader.calendar.Count - 1])
-                    day -= Mo.days;
+                    dayOfMonth -= Mo.days;
             }
 
-            return new Date(year, month, day, hours, minutes, seconds);
+            return new Date(year, month, dayOfMonth, day, hours, minutes, seconds);
         }
 
         /// <summary>
@@ -528,8 +529,9 @@ namespace Kronometer
 
             // Temporary Month (needed later)
             Month month = null;
+            int dayOfMonth = 0;
 
-            // If there are months, change 'day' to indicate the current 'day of the month'
+            // If there are months, change 'dayOfMonth' to indicate the current 'day of the month'
             if (loader.calendar.Count > 0)
             {
                 // Calculate the time passed from the last month reset
@@ -566,11 +568,11 @@ namespace Kronometer
                 }
 
                 // Set 'day' as 'day of the month'
-                day = daysFromReset;
+                dayOfMonth = daysFromReset;
             }
 
             // The final date
-            return new Date(year, month, day, hours, minutes, seconds);
+            return new Date(year, month, dayOfMonth, day, hours, minutes, seconds);
         }
 
 
@@ -597,6 +599,7 @@ namespace Kronometer
             // Offset years and days
             date.year += loader.Display.CustomPrintDate.offsetYear;
             date.day += loader.Display.CustomPrintDate.offsetDay;
+            date.dayOfMonth += loader.Display.CustomPrintDate.offsetDay;
 
             // The format in which we will display the date
             string format = loader.Display.CustomPrintDate.displayDate;
@@ -613,7 +616,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.dayOfMonth, date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -748,32 +751,35 @@ namespace Kronometer
             // Fix Months
             .Replace("{Mo}", "{1}")
             .Replace("{Mo:", "{1:")
+            .Replace("{Dm}", "{2}")
+            .Replace("{Dm:", "{2:")
+            .Replace("{Dm,", "{2,")
 
             // Fix Days
-            .Replace("{D}", "{2}")
-            .Replace("{D:", "{2:")
-            .Replace("{D,", "{2,")
+            .Replace("{D}", "{3}")
+            .Replace("{D:", "{3:")
+            .Replace("{D,", "{3,")
             .Replace("{D0}", loader.Clock.day.symbol)
             .Replace("{D1}", loader.Clock.day.singular)
 
             // Fix Hours
-            .Replace("{H}", "{3}")
-            .Replace("{H:", "{3:")
-            .Replace("{H,", "{3,")
+            .Replace("{H}", "{4}")
+            .Replace("{H:", "{4:")
+            .Replace("{H,", "{4,")
             .Replace("{H0}", loader.Clock.hour.symbol)
             .Replace("{H1}", loader.Clock.hour.singular)
 
             // Fix Minutes
-            .Replace("{M}", "{4}")
-            .Replace("{M:", "{4:")
-            .Replace("{M,", "{4,")
+            .Replace("{M}", "{5}")
+            .Replace("{M:", "{5:")
+            .Replace("{M,", "{5,")
             .Replace("{M0}", loader.Clock.minute.symbol)
             .Replace("{M1}", loader.Clock.minute.singular)
 
             // Fix Seconds
-            .Replace("{S}", "{5}")
-            .Replace("{S:", "{5:")
-            .Replace("{S,", "{5,")
+            .Replace("{S}", "{6}")
+            .Replace("{S:", "{6:")
+            .Replace("{S,", "{6,")
             .Replace("{S0}", loader.Clock.second.symbol)
             .Replace("{S1}", loader.Clock.second.singular);
         }
@@ -889,15 +895,17 @@ namespace Kronometer
     {
         public int year { get; set; }
         public Month month { get; set; }
+        public int dayOfMonth { get; set; }
         public int day { get; set; }
         public int hours { get; set; }
         public int minutes { get; set; }
         public int seconds { get; set; }
 
-        public Date(int year, Month month, int day, int hours, int minutes, int seconds)
+        public Date(int year, Month month, int dayOfMonth, int day, int hours, int minutes, int seconds)
         {
             this.year = year;
             this.day = day;
+            this.dayOfMonth = dayOfMonth;
             this.month = month;
             this.hours = hours;
             this.minutes = minutes;
@@ -907,8 +915,9 @@ namespace Kronometer
         public Date(Date date)
         {
             year = date.year;
-            day = date.day;
             month = date.month;
+            dayOfMonth = date.dayOfMonth;
+            day = date.day;
             hours = date.hours;
             minutes = date.minutes;
             seconds = date.seconds;
