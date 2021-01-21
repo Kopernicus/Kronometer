@@ -41,7 +41,7 @@ namespace Kronometer
 
                 // Get home planet day (rotation) and year (revolution)
                 if (loader.useHomeDay)
-                    loader.Clock.day.value = homePlanet.solarDayLength;
+                    loader.Clock.day.value = homePlanet.solarRotationPeriod ? homePlanet.rotationPeriod : homePlanet.solarDayLength;
                 if (loader.useHomeYear)
                     loader.Clock.year.value = homePlanet.orbitDriver.orbit.period;
 
@@ -408,23 +408,19 @@ namespace Kronometer
         /// </summary>
         public virtual Date GetDate(double time)
         {
-            // Current Year
-            int year = (int)Math.Floor(time / loader.Clock.year.value);
+            double yearValue = loader.Clock.year.value;
+            double dayValue = loader.Clock.day.value;
 
-            // Time carried over each year
-            double AnnualCarryOver = loader.Clock.year.value % loader.Clock.day.value;
-
-            // Time carried over this year
-            double CarryOverThisYear = MOD(AnnualCarryOver * year, loader.Clock.day.value);
-
-            // Time passed this year
-            double timeThisYear = MOD(time, loader.Clock.year.value) + CarryOverThisYear;
-
-            // Current Day of the year
-            int day = (int)Math.Floor(timeThisYear / loader.Clock.day.value.Value);
+            Debug.Log("SigmaLog: GET DATE: time = " + time + ", loader.Clock.year.value = " + yearValue + ", loader.Clock.day.value = " + dayValue);
+            int year = (int)Math.Floor(time / yearValue);
+            double startOfYear = year * yearValue;
+            Debug.Log("SigmaLog: startOfYear = " + startOfYear);
+            Debug.Log("SigmaLog: ratio1 = " + time / dayValue + ", ratio2 = " + startOfYear / dayValue);
+            int day = (int)Math.Floor(time / dayValue) - (int)Math.Floor(startOfYear / dayValue);
+            int smartday = SmartFloor(time / dayValue) - SmartFloor(startOfYear / dayValue);
 
             // Time left to count
-            double left = MOD(time, loader.Clock.day.value);
+            double left = MOD(time, dayValue);
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
@@ -457,6 +453,7 @@ namespace Kronometer
                     dayOfMonth -= Mo.days;
             }
 
+            Debug.Log("SigmaLog: time = " + time + ", year = " + year + ", day = " + day + ", smartday = " + smartday);
             return new Date(year, month, dayOfMonth, day, hours, minutes, seconds);
         }
 
@@ -868,6 +865,16 @@ namespace Kronometer
         public double MOD(double number, double divisor)
         {
             return (number % divisor + divisor) % divisor;
+        }
+
+        public int SmartFloor(double number)
+        {
+            int output = (int)Math.Ceiling(number);
+
+            if (output - number < 0.0001)
+                return output;
+
+            return (int)Math.Floor(number);
         }
 
         /// In these Properties is stored the length of each time unit in game seconds
