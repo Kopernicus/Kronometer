@@ -408,19 +408,15 @@ namespace Kronometer
         /// </summary>
         public virtual Date GetDate(double time)
         {
-            double yearValue = loader.Clock.year.value;
-            double dayValue = loader.Clock.day.value;
+            // Current year
+            int year = (int)Math.Floor(time / loader.Clock.year.value);
+            double startOfYear = year * loader.Clock.year.value;
 
-            Debug.Log("SigmaLog: GET DATE: time = " + time + ", loader.Clock.year.value = " + yearValue + ", loader.Clock.day.value = " + dayValue);
-            int year = (int)Math.Floor(time / yearValue);
-            double startOfYear = year * yearValue;
-            Debug.Log("SigmaLog: startOfYear = " + startOfYear);
-            Debug.Log("SigmaLog: ratio1 = " + time / dayValue + ", ratio2 = " + startOfYear / dayValue);
-            int day = (int)Math.Floor(time / dayValue) - (int)Math.Floor(startOfYear / dayValue);
-            int smartday = SmartFloor(time / dayValue) - SmartFloor(startOfYear / dayValue);
+            // Current day
+            int day = SmartFloor(time / loader.Clock.day.value) - SmartFloor(startOfYear / loader.Clock.day.value);
 
             // Time left to count
-            double left = MOD(time, dayValue);
+            double left = MOD(time, loader.Clock.day.value);
 
             // Number of hours in this day
             int hours = (int)(left / loader.Clock.hour.value);
