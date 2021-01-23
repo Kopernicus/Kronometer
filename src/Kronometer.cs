@@ -41,7 +41,7 @@ namespace Kronometer
 
                 // Get home planet day (rotation) and year (revolution)
                 if (loader.useHomeDay)
-                    loader.Clock.day.value = homePlanet.solarRotationPeriod ? homePlanet.rotationPeriod : homePlanet.sideralDayLength();
+                    loader.Clock.day.value = homePlanet.solarDayLength;
                 if (loader.useHomeYear)
                     loader.Clock.year.value = homePlanet.orbitDriver.orbit.period;
 
@@ -83,20 +83,6 @@ namespace Kronometer
             }
         }
     }
-
-    public static class Extensions
-    {
-        public static double sideralDayLength(this CelestialBody body)
-        {
-            if (body.solarRotationPeriod)
-            {
-                return body.orbitDriver.orbit.period * body.rotationPeriod / (body.orbitDriver.orbit.period - body.rotationPeriod);
-            }
-
-            return body.rotationPeriod;
-        }
-    }
-
 
     // THIS IS THE REAL STUFF!
     public class ClockFormatter : IDateTimeFormatter
