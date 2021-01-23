@@ -449,7 +449,6 @@ namespace Kronometer
                     dayOfMonth -= Mo.days;
             }
 
-            Debug.Log("SigmaLog: time = " + time + ", year = " + year + ", day = " + day + ", smartday = " + smartday);
             return new Date(year, month, dayOfMonth, day, hours, minutes, seconds);
         }
 
