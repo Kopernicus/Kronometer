@@ -464,14 +464,18 @@ namespace Kronometer
         /// <returns></returns>
         public virtual Date GetLeapDate(double time)
         {
+            // Number of days in a short (non-leap) year
+            int daysInOneShortYear = SmartFloor(loader.Clock.year.value / loader.Clock.day.value);
+            int daysInOneLongYear = (int)Math.Ceiling(loader.Clock.year.value / loader.Clock.day.value);
+
             // Time in a short (non-leap) year
-            double shortYear = loader.Clock.year.value - (loader.Clock.year.value % loader.Clock.day.value);
+            double shortYear = loader.Clock.day.value * daysInOneShortYear;
 
             // Chance of getting a leap day in a year
-            double chanceOfLeapDay = (loader.Clock.year.value % loader.Clock.day.value) / loader.Clock.day.value;
+            double chanceOfLeapDay = (loader.Clock.year.value / loader.Clock.day.value) % 1;
 
-            // Number of days in a short (non-leap) year
-            int daysInOneShortYear = (int)(shortYear / loader.Clock.day.value);
+            if (daysInOneShortYear == daysInOneLongYear)
+                chanceOfLeapDay = 0;
 
             // Time left to count
             double left = time;
@@ -483,16 +487,15 @@ namespace Kronometer
             int minutes = 0;
             int seconds = 0;
 
-            //Console.WriteLine("time = " + time);
-
-            while (!(left < shortYear))
+            while (left >= shortYear)
             {
                 left -= shortYear;
                 leap += chanceOfLeapDay;
                 year += 1;
-                while (!(leap < 1))
+
+                while (SmartFloor(leap) >= 1)
                 {
-                    leap -= 1;
+                    leap = Math.Max(leap - 1, 0);
 
                     if (!(left < loader.Clock.day.value))
                     {
@@ -508,6 +511,12 @@ namespace Kronometer
 
             day += (int)(left / loader.Clock.day.value);
             left -= (int)(left / loader.Clock.day.value) * loader.Clock.day.value;
+
+            if (left >= loader.Clock.day.value)
+            {
+                day += 1;
+                left -= loader.Clock.day.value;
+            }
 
             hours = (int)(left / 3600);
             left -= hours * 3600;
