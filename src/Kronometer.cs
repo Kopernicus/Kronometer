@@ -53,6 +53,10 @@ namespace Kronometer
                 loader.Clock.year.value = Math.Abs(loader.Clock.year.value);
                 loader.Clock.day.value = Math.Abs(loader.Clock.day.value);
 
+                // Fix Months
+                if (loader.resetMonthNum == 0)
+                    loader.resetMonthNum = loader.calendar?.Count ?? 1;
+
                 // Round values where it is required
                 if (loader.Clock.year.round)
                     loader.Clock.year.value = Math.Round(loader.Clock.year.value, 0);
@@ -404,20 +408,12 @@ namespace Kronometer
         /// </summary>
         public virtual Date GetDate(double time)
         {
-            // Current Year
+            // Current year
             int year = (int)Math.Floor(time / loader.Clock.year.value);
+            double startOfYear = year * loader.Clock.year.value;
 
-            // Time carried over each year
-            double AnnualCarryOver = loader.Clock.year.value % loader.Clock.day.value;
-
-            // Time carried over this year
-            double CarryOverThisYear = MOD(AnnualCarryOver * year, loader.Clock.day.value);
-
-            // Time passed this year
-            double timeThisYear = MOD(time, loader.Clock.year.value) + CarryOverThisYear;
-
-            // Current Day of the year
-            int day = (int)Math.Floor(timeThisYear / loader.Clock.day.value.Value);
+            // Current day
+            int day = SmartFloor(time / loader.Clock.day.value) - SmartFloor(startOfYear / loader.Clock.day.value);
 
             // Time left to count
             double left = MOD(time, loader.Clock.day.value);
@@ -439,6 +435,7 @@ namespace Kronometer
 
             // Get Month
             Month month = null;
+            int dayOfMonth = day;
 
             for (int i = 0; i < loader?.calendar?.Count; i++)
             {
@@ -446,13 +443,13 @@ namespace Kronometer
 
                 month = Mo;
 
-                if (day < Mo.days)
+                if (dayOfMonth < Mo.days)
                     break;
                 else if (Mo != loader.calendar[loader.calendar.Count - 1])
-                    day -= Mo.days;
+                    dayOfMonth -= Mo.days;
             }
 
-            return new Date(year, month, day, hours, minutes, seconds);
+            return new Date(year, month, dayOfMonth, day, hours, minutes, seconds);
         }
 
         /// <summary>
@@ -467,14 +464,18 @@ namespace Kronometer
         /// <returns></returns>
         public virtual Date GetLeapDate(double time)
         {
+            // Number of days in a short (non-leap) year
+            int daysInOneShortYear = SmartFloor(loader.Clock.year.value / loader.Clock.day.value);
+            int daysInOneLongYear = (int)Math.Ceiling(loader.Clock.year.value / loader.Clock.day.value);
+
             // Time in a short (non-leap) year
-            double shortYear = loader.Clock.year.value - (loader.Clock.year.value % loader.Clock.day.value);
+            double shortYear = loader.Clock.day.value * daysInOneShortYear;
 
             // Chance of getting a leap day in a year
-            double chanceOfLeapDay = (loader.Clock.year.value % loader.Clock.day.value) / loader.Clock.day.value;
+            double chanceOfLeapDay = (loader.Clock.year.value / loader.Clock.day.value) % 1;
 
-            // Number of days in a short (non-leap) year
-            int daysInOneShortYear = (int)(shortYear / loader.Clock.day.value);
+            if (daysInOneShortYear == daysInOneLongYear)
+                chanceOfLeapDay = 0;
 
             // Time left to count
             double left = time;
@@ -486,16 +487,15 @@ namespace Kronometer
             int minutes = 0;
             int seconds = 0;
 
-            //Console.WriteLine("time = " + time);
-
-            while (!(left < shortYear))
+            while (left >= shortYear)
             {
                 left -= shortYear;
                 leap += chanceOfLeapDay;
                 year += 1;
-                while (!(leap < 1))
+
+                while (SmartFloor(leap) >= 1)
                 {
-                    leap -= 1;
+                    leap = Math.Max(leap - 1, 0);
 
                     if (!(left < loader.Clock.day.value))
                     {
@@ -512,6 +512,12 @@ namespace Kronometer
             day += (int)(left / loader.Clock.day.value);
             left -= (int)(left / loader.Clock.day.value) * loader.Clock.day.value;
 
+            if (left >= loader.Clock.day.value)
+            {
+                day += 1;
+                left -= loader.Clock.day.value;
+            }
+
             hours = (int)(left / 3600);
             left -= hours * 3600;
 
@@ -524,8 +530,9 @@ namespace Kronometer
 
             // Temporary Month (needed later)
             Month month = null;
+            int dayOfMonth = 0;
 
-            // If there are months, change 'day' to indicate the current 'day of the month'
+            // If there are months, change 'dayOfMonth' to indicate the current 'day of the month'
             if (loader.calendar.Count > 0)
             {
                 // Calculate the time passed from the last month reset
@@ -561,12 +568,12 @@ namespace Kronometer
                     // If we run out of months, the last month will last until the next reset
                 }
 
-                // Set 'day' as 'day of the month'
-                day = daysFromReset;
+                // Set 'dayOfMonth' as 'day of the month'
+                dayOfMonth = daysFromReset;
             }
 
             // The final date
-            return new Date(year, month, day, hours, minutes, seconds);
+            return new Date(year, month, dayOfMonth, day, hours, minutes, seconds);
         }
 
 
@@ -592,6 +599,7 @@ namespace Kronometer
 
             // Offset years and days
             date.year += loader.Display.CustomPrintDate.offsetYear;
+            date.dayOfMonth += loader.Display.CustomPrintDate.offsetDay;
             date.day += loader.Display.CustomPrintDate.offsetDay;
 
             // The format in which we will display the date
@@ -609,7 +617,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.dayOfMonth, date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -633,6 +641,7 @@ namespace Kronometer
 
             // Offset years and days
             date.year += loader.Display.CustomPrintDateNew.offsetYear;
+            date.dayOfMonth += loader.Display.CustomPrintDateNew.offsetDay;
             date.day += loader.Display.CustomPrintDateNew.offsetDay;
 
             // The format in which we will display the date
@@ -646,7 +655,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.dayOfMonth, date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -670,6 +679,7 @@ namespace Kronometer
 
             // Offset years and days
             date.year += loader.Display.CustomPrintDateCompact.offsetYear;
+            date.dayOfMonth += loader.Display.CustomPrintDateCompact.offsetDay;
             date.day += loader.Display.CustomPrintDateCompact.offsetDay;
 
             // The format in which we will display the date
@@ -687,7 +697,7 @@ namespace Kronometer
             format = FormatFixer(format, date);
 
             // Create the date in the required format and return
-            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.day, date.hours, date.minutes, date.seconds);
+            stringBuilder.AppendFormat(format, date.year, date.month != null ? date.month.Number(loader.calendar, loader.resetMonthNum).ToString() : "NaM", date.dayOfMonth, date.day, date.hours, date.minutes, date.seconds);
 
             return stringBuilder.ToStringAndRelease();
         }
@@ -719,9 +729,11 @@ namespace Kronometer
         /// RULES:
         /// Angle brackets are used in place of curly brackets
         /// </summary>
-        /// <Y> <Mo> <D> <M> <H> <S>         - number of the relative unit in the date
+        /// <Y> <Mo> <Dm> <D> <M> <H> <S>    - number of the relative unit in the date*
         /// <Y0> <D0> <M0> <H0> <S0>         - symbol of the relative unit
         /// <Y1> <D1> <M1> <H1> <S1>         - singular name of the relative unit
+        /// 
+        /// *note: <D> is the day of the year, <Dm> is the day of the month
         public virtual string FormatFixer(string format)
         {
             return format
@@ -744,32 +756,35 @@ namespace Kronometer
             // Fix Months
             .Replace("{Mo}", "{1}")
             .Replace("{Mo:", "{1:")
+            .Replace("{Dm}", "{2}")
+            .Replace("{Dm:", "{2:")
+            .Replace("{Dm,", "{2,")
 
             // Fix Days
-            .Replace("{D}", "{2}")
-            .Replace("{D:", "{2:")
-            .Replace("{D,", "{2,")
+            .Replace("{D}", "{3}")
+            .Replace("{D:", "{3:")
+            .Replace("{D,", "{3,")
             .Replace("{D0}", loader.Clock.day.symbol)
             .Replace("{D1}", loader.Clock.day.singular)
 
             // Fix Hours
-            .Replace("{H}", "{3}")
-            .Replace("{H:", "{3:")
-            .Replace("{H,", "{3,")
+            .Replace("{H}", "{4}")
+            .Replace("{H:", "{4:")
+            .Replace("{H,", "{4,")
             .Replace("{H0}", loader.Clock.hour.symbol)
             .Replace("{H1}", loader.Clock.hour.singular)
 
             // Fix Minutes
-            .Replace("{M}", "{4}")
-            .Replace("{M:", "{4:")
-            .Replace("{M,", "{4,")
+            .Replace("{M}", "{5}")
+            .Replace("{M:", "{5:")
+            .Replace("{M,", "{5,")
             .Replace("{M0}", loader.Clock.minute.symbol)
             .Replace("{M1}", loader.Clock.minute.singular)
 
             // Fix Seconds
-            .Replace("{S}", "{5}")
-            .Replace("{S:", "{5:")
-            .Replace("{S,", "{5,")
+            .Replace("{S}", "{6}")
+            .Replace("{S:", "{6:")
+            .Replace("{S,", "{6,")
             .Replace("{S0}", loader.Clock.second.symbol)
             .Replace("{S1}", loader.Clock.second.singular);
         }
@@ -782,7 +797,8 @@ namespace Kronometer
         /// Angle brackets are used in place of curly brackets
         /// <Mo0> <Mo1>                  - symbol and name of the required month
         /// <Y2> <D2> <M2> <H2> <S2>     - plural name of the relative unit (uses singular when the number is 1)
-        /// <Dth>                        - ordinal suffix for the number of the day ("st", "nd", "rd", "th")
+        /// <Dmth>                       - ordinal suffix for the number of the day of the month ("st", "nd", "rd", "th")
+        /// <Dth>                        - ordinal suffix for the number of the day of the year  ("st", "nd", "rd", "th")
         /// </summary>
         public virtual string FormatFixer(string format, Date date)
         {
@@ -800,7 +816,8 @@ namespace Kronometer
             .Replace("{Mo1}", date.month != null ? date.month.name : "NaM")
 
             // Fix Days
-            .Replace("{Dth}", GetOrdinal(date.day));
+            .Replace("{Dth}", GetOrdinal(date.day))
+            .Replace("{Dmth}", GetOrdinal(date.dayOfMonth));
         }
 
         /// <summary>
@@ -854,6 +871,16 @@ namespace Kronometer
             return (number % divisor + divisor) % divisor;
         }
 
+        public int SmartFloor(double number)
+        {
+            int output = (int)Math.Ceiling(number);
+
+            if (output - number < 0.0001)
+                return output;
+
+            return (int)Math.Floor(number);
+        }
+
         /// In these Properties is stored the length of each time unit in game seconds
         /// These can be found in stock as well, and should be used by other mods that deal with time
         public virtual int Second
@@ -885,15 +912,17 @@ namespace Kronometer
     {
         public int year { get; set; }
         public Month month { get; set; }
+        public int dayOfMonth { get; set; }
         public int day { get; set; }
         public int hours { get; set; }
         public int minutes { get; set; }
         public int seconds { get; set; }
 
-        public Date(int year, Month month, int day, int hours, int minutes, int seconds)
+        public Date(int year, Month month, int dayOfMonth, int day, int hours, int minutes, int seconds)
         {
             this.year = year;
             this.day = day;
+            this.dayOfMonth = dayOfMonth;
             this.month = month;
             this.hours = hours;
             this.minutes = minutes;
@@ -903,8 +932,9 @@ namespace Kronometer
         public Date(Date date)
         {
             year = date.year;
-            day = date.day;
             month = date.month;
+            dayOfMonth = date.dayOfMonth;
+            day = date.day;
             hours = date.hours;
             minutes = date.minutes;
             seconds = date.seconds;
