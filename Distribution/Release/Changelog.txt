@@ -1,3 +1,9 @@
+**v1.11.0-1**
+
+- Updated to KSP 1.11.0 and Kopernicus.Parser v1.11.0_Release63
+- Fixed Date and LeapDate calculation
+
+
 **v1.7.3-1**
 
 - Updated to KSP 1.7.3 and Kopernicus.Parser v1.7.3-2
