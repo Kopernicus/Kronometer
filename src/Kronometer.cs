@@ -398,6 +398,11 @@ namespace Kronometer
             return stringBuilder.ToStringAndRelease();
         }
 
+        public virtual string PrintDateDeltaCompact(double time, bool includeTime, bool includeSeconds, bool useAbs, int uselessint)
+        {
+            return PrintDateDeltaCompact(time, includeTime, includeSeconds, useAbs);
+        }
+
         /// <summary>
         /// Calculates the current date
         /// This will work also when a year cannot be divided in days without a remainder
